@@ -66,18 +66,32 @@ button {
     position: absolute;
     width: 70px;
     height: 70px;
+    background-size: contain;
+    background-repeat: no-repeat;
 }
 
-.plant.sunflower { background-image: url('../res/sunflower.png'); background-size: contain; }
-.plant.peashooter { background-image: url('../res/peashooter.png'); background-size: contain; }
-.plant.wallnut { background-image: url('../res/wallnut.png'); background-size: contain; }
-.plant.potatomine { background-image: url('../res/potatomine.png'); background-size: contain; }
-.plant.snowpea { background-image: url('../res/snowpea.png'); background-size: contain; }
+.plant.sunflower { background-image: url('../res/normal/sunflower.png'); }
+.plant.peashooter { background-image: url('../res/normal/peashooter.png'); }
+.plant.wallnut { background-image: url('../res/normal/wallnut.png'); }
+.plant.potatomine { background-image: url('../res/normal/potatomine.png'); }
+.plant.snowpea { background-image: url('../res/normal/snowpea.png'); }
+.plant.chili { background-image: url('../res/normal/chili.png'); }
+.plant.repeater { background-image: url('../res/normal/repeater.png'); }
+.plant.corn { background-image: url('../res/normal/corn.png'); }
+.plant.garlic { background-image: url('../res/normal/garlic.png'); }
+.plant.twinflower { background-image: url('../res/normal/twinflower.png'); }
+.plant.magnetshroom { background-image: url('../res/normal/magnetshroom.png'); }
+.plant.cattail { background-image: url('../res/normal/cattail.png'); }
+.plant.catapult { background-image: url('../res/normal/catapult.png'); }
 
-.zombie.normal { background-image: url('../res/zombie_normal.png'); background-size: contain; }
-.zombie.conehead { background-image: url('../res/zombie_conehead.png'); background-size: contain; }
-.zombie.buckethead { background-image: url('../res/zombie_buckethead.png'); background-size: contain; }
-.zombie.runner { background-image: url('../res/zombie_runner.png'); background-size: contain; }
+.zombie.normal { background-image: url('../res/normal/zombie_normal.png'); }
+.zombie.conehead { background-image: url('../res/normal/zombie_conehead.png'); }
+.zombie.buckethead { background-image: url('../res/normal/zombie_buckethead.png'); }
+.zombie.runner { background-image: url('../res/normal/zombie_runner.png'); }
+
+/* Стили для смешанных растений */
+.plant.sunflower_hybrid { background-image: url('../res/hybrid/sunflower_hybrid.png'); }
+/* Другие смешанные растения добавьте аналогичным образом */
 
 /* Адаптивные стили для мобильных устройств */
 @media (max-width: 768px) {
