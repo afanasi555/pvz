@@ -1,21 +1,59 @@
+/* Основные стили для страницы */
 body {
     font-family: Arial, sans-serif;
-    text-align: center;
+    margin: 0;
+    padding: 0;
     background-color: #f0f8ff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
+
+header {
+    background-color: #4caf50;
+    color: white;
+    padding: 10px;
+    width: 100%;
+    text-align: center;
+}
+
+main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+#controls {
+    margin: 20px;
+    text-align: center;
+}
+
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+    margin: 5px;
+    cursor: pointer;
+}
+
 #game-board {
     display: grid;
     grid-template-columns: repeat(9, 80px);
     grid-template-rows: repeat(5, 80px);
     gap: 5px;
-    margin: 0 auto;
     background-color: #c8e6c9;
     border: 5px solid #4caf50;
     padding: 10px;
+    width: 100%;
+    max-width: 720px; /* Максимальная ширина для ПК */
+    aspect-ratio: 9 / 5; /* Сохраняет пропорции на всех устройствах */
 }
+
+/* Стили для ячеек поля */
 .cell {
-    width: 80px;
-    height: 80px;
+    width: 100%;
+    height: 100%;
     background-color: #8bc34a;
     border: 2px solid #558b2f;
     position: relative;
@@ -23,11 +61,13 @@ body {
     align-items: center;
     justify-content: center;
 }
+
 .plant, .zombie {
     position: absolute;
     width: 70px;
     height: 70px;
 }
+
 .plant.sunflower { background-image: url('../res/sunflower.png'); background-size: contain; }
 .plant.peashooter { background-image: url('../res/peashooter.png'); background-size: contain; }
 .plant.wallnut { background-image: url('../res/wallnut.png'); background-size: contain; }
@@ -39,11 +79,41 @@ body {
 .zombie.buckethead { background-image: url('../res/zombie_buckethead.png'); background-size: contain; }
 .zombie.runner { background-image: url('../res/zombie_runner.png'); background-size: contain; }
 
-#controls {
-    margin: 20px;
+/* Адаптивные стили для мобильных устройств */
+@media (max-width: 768px) {
+    #game-board {
+        grid-template-columns: repeat(6, 60px);
+        grid-template-rows: repeat(4, 60px);
+        max-width: 100%;
+        aspect-ratio: 6 / 4;
+    }
+
+    .cell {
+        width: 100%;
+        height: 100%;
+    }
+
+    button {
+        padding: 8px 16px;
+        font-size: 14px;
+    }
 }
-button {
-    padding: 10px 20px;
-    font-size: 16px;
-    margin: 5px;
+
+/* Стили для узких экранов, например, в вертикальной ориентации */
+@media (max-width: 480px) {
+    #game-board {
+        grid-template-columns: repeat(4, 50px);
+        grid-template-rows: repeat(5, 50px);
+        aspect-ratio: 4 / 5;
+    }
+
+    .cell {
+        width: 100%;
+        height: 100%;
+    }
+
+    button {
+        padding: 6px 12px;
+        font-size: 12px;
+    }
 }
