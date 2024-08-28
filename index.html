@@ -65,5 +65,31 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/7.2.0/pixi.min.js"></script>
     <script src="assets/game function/game.js"></script>
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zombies vs Plants</title>
+    <link rel="stylesheet" href="assets/game function/style.css">
+</head>
+<body>
+    <header>
+        <h1>Zombies vs Plants</h1>
+    </header>
+    <main>
+        <div id="controls">
+            <div id="plant-selection">
+                <!-- Кнопки для выбора растений будут динамически добавлены -->
+            </div>
+            <div>Солнца: <span id="sun-count">0</span></div>
+            <button onclick="resetGame()">Сброс</button>
+            <button onclick="startGame()">Начать игру</button>
+            <button onclick="generateNewLevels()">Добавить новые уровни</button>
+        </div>
+        <div id="game-board"></div>
+    </main>
+    <script src="assets/game function/game.js"></script>
+</body>
+</html>
+
 </body>
 </html>
