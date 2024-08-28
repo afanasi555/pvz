@@ -1,189 +1,249 @@
-const rows = 5;
-const cols = 9;
+// Инициализация PIXI.js
+const app = new PIXI.Application({
+    width: window.innerWidth,
+    height: window.innerHeight,
+    backgroundColor: 0x87CEEB
+});
+document.body.appendChild(app.view);
+
+// Загрузка ресурсов
+PIXI.Loader.shared
+    .add('sunflower', 'assets/res/normal/sunflower1.png')
+    .add('sunflower2', 'assets/res/normal/sunflower2.png')
+    .add('sunflower3', 'assets/res/normal/sunflower3.png')
+    .add('peashooter1', 'assets/res/normal/peashooter1.png')
+    .add('peashooter2', 'assets/res/normal/peashooter2.png')
+    .add('peashooter3', 'assets/res/normal/peashooter3.png')
+    .add('pea1', 'assets/res/normal/pea1.png')
+    .add('pea2', 'assets/res/normal/pea2.png')
+    .add('pea3', 'assets/res/normal/pea3.png')
+    .add('potatomine1', 'assets/res/normal/potatomine1.png')
+    .add('potatomine2', 'assets/res/normal/potatomine2.png')
+    .add('potatomine3', 'assets/res/normal/potatomine3.png')
+    .add('potatomine_explode1', 'assets/res/normal/potatomine_explode1.png')
+    .add('potatomine_explode2', 'assets/res/normal/potatomine_explode2.png')
+    .add('potatomine_explode3', 'assets/res/normal/potatomine_explode3.png')
+    .add('snowpea1', 'assets/res/normal/snowpea1.png')
+    .add('snowpea2', 'assets/res/normal/snowpea2.png')
+    .add('snowpea3', 'assets/res/normal/snowpea3.png')
+    .add('snowpea_shoot1', 'assets/res/normal/snowpea_shoot1.png')
+    .add('snowpea_shoot2', 'assets/res/normal/snowpea_shoot2.png')
+    .add('snowpea_shoot3', 'assets/res/normal/snowpea_shoot3.png')
+    .add('chili1', 'assets/res/normal/chili1.png')
+    .add('chili2', 'assets/res/normal/chili2.png')
+    .add('chili3', 'assets/res/normal/chili3.png')
+    .add('repeater1', 'assets/res/normal/repeater1.png')
+    .add('repeater2', 'assets/res/normal/repeater2.png')
+    .add('repeater3', 'assets/res/normal/repeater3.png')
+    .add('repeater_pea1', 'assets/res/normal/repeater_pea1.png')
+    .add('repeater_pea2', 'assets/res/normal/repeater_pea2.png')
+    .add('repeater_pea3', 'assets/res/normal/repeater_pea3.png')
+    .add('corn1', 'assets/res/normal/corn1.png')
+    .add('corn2', 'assets/res/normal/corn2.png')
+    .add('corn3', 'assets/res/normal/corn3.png')
+    .add('corn_shot1', 'assets/res/normal/corn_shot1.png')
+    .add('corn_shot2', 'assets/res/normal/corn_shot2.png')
+    .add('corn_shot3', 'assets/res/normal/corn_shot3.png')
+    .add('garlic1', 'assets/res/normal/garlic1.png')
+    .add('garlic2', 'assets/res/normal/garlic2.png')
+    .add('garlic3', 'assets/res/normal/garlic3.png')
+    .add('zombie_normal1', 'assets/res/normal/zombie_normal1.png')
+    .add('zombie_normal2', 'assets/res/normal/zombie_normal2.png')
+    .add('zombie_normal3', 'assets/res/normal/zombie_normal3.png')
+    .add('zombie_buckethead1', 'assets/res/normal/zombie_buckethead1.png')
+    .add('zombie_buckethead2', 'assets/res/normal/zombie_buckethead2.png')
+    .add('zombie_buckethead3', 'assets/res/normal/zombie_buckethead3.png')
+    .add('zombie_conehead1', 'assets/res/normal/zombie_conehead1.png')
+    .add('zombie_conehead2', 'assets/res/normal/zombie_conehead2.png')
+    .add('zombie_conehead3', 'assets/res/normal/zombie_conehead3.png')
+    .add('zombie_runner1', 'assets/res/normal/zombie_runner1.png')
+    .add('zombie_runner2', 'assets/res/normal/zombie_runner2.png')
+    .add('zombie_runner3', 'assets/res/normal/zombie_runner3.png')
+    .add('sunflowerHybrid', 'assets/res/hybrid/sunflower.png')
+    .add('peashooterHybrid', 'assets/res/hybrid/peashooter.png')
+    .add('wallnutHybrid', 'assets/res/hybrid/wallnut.png')
+    .add('potatoMineHybrid', 'assets/res/hybrid/potato_mine.png')
+    .add('chiliBeanHybrid', 'assets/res/hybrid/chili_bean.png')
+    .add('zombieHybrid1', 'assets/res/hybrid/zombie1.png')
+    .add('zombieHybrid2', 'assets/res/hybrid/zombie2.png')
+    .add('zombieHybrid3', 'assets/res/hybrid/zombie3.png')
+    .load(setup);
+
 let sunCount = 0;
 const plants = [];
-const unlockedPlants = [];
-let selectedPlant = null;
-let gameInterval;
-let currentLevel = 1;
+const zombies = [];
 
-// Все доступные растения
-const allPlants = {
-    sunflower: { cost: 50 },
-    peashooter: { cost: 100 },
-    wallnut: { cost: 50 },
-    potatomine: { cost: 25 },
-    snowpea: { cost: 150 },
-    chili: { cost: 100 },
-    repeater: { cost: 200 },
-    corn: { cost: 125 },
-    garlic: { cost: 75 },
-    twinflower: { cost: 150 },
-    magnetshroom: { cost: 200 },
-    cattail: { cost: 175 },
-    catapult: { cost: 250 },
-    sunflower_hybrid: { cost: 100 },
-    // Добавьте другие гибридные растения здесь
-};
-
-// Все доступные зомби
-const allZombies = {
-    normal: { speed: 1 },
-    conehead: { speed: 1.2 },
-    buckethead: { speed: 1.5 },
-    runner: { speed: 1.8 }
-};
-
-// Создание игрового поля
-function createBoard() {
-    const gameBoard = document.getElementById('game-board');
-    gameBoard.innerHTML = ''; // Очистить поле перед началом новой игры
-    for (let i = 0; i < rows * cols; i++) {
-        const cell = document.createElement('div');
-        cell.classList.add('cell');
-        cell.dataset.index = i;
-        gameBoard.appendChild(cell);
-    }
+// Настройка начального состояния
+function setup(loader, resources) {
+    createUI();
+    createPlantSelection();
+    // Добавляем начальные растения и зомби
+    createPlant('sunflower', 100, 100, resources);
+    createZombie('zombie_normal1', 800, 100, resources);
 }
 
-// Добавление кнопок для выбора растений
-function updatePlantSelection() {
-    const plantSelection = document.getElementById('plant-selection');
-    plantSelection.innerHTML = ''; // Очистить предыдущие кнопки
+// Создание пользовательского интерфейса
+function createUI() {
+    const controls = document.getElementById('controls');
+    document.getElementById('sun-count').textContent = sunCount;
 
-    Object.keys(allPlants).forEach(plantType => {
-        if (currentLevel >= getPlantUnlockLevel(plantType)) {
-            const button = document.createElement('button');
-            button.textContent = plantType.charAt(0).toUpperCase() + plantType.slice(1);
-            button.onclick = () => selectPlant(plantType);
-            plantSelection.appendChild(button);
+    controls.querySelector('button[onclick="resetGame()"]').addEventListener('click', resetGame);
+    controls.querySelector('button[onclick="startGame()"]').addEventListener('click', startGame);
+    controls.querySelector('button[onclick="generateNewLevels()"]').addEventListener('click', generateNewLevels);
+}
+
+// Создание кнопок выбора растений
+function createPlantSelection() {
+    const selectionDiv = document.getElementById('plant-selection');
+
+    const plantsData = [
+        { type: 'sunflower', cost: 50 },
+        { type: 'peashooter', cost: 100 },
+        { type: 'wallnut', cost: 50 },
+        { type: 'potatoMine', cost: 25 },
+        { type: 'chiliBean', cost: 100 },
+        { type: 'snowpea', cost: 75 },
+        { type: 'repeater', cost: 150 },
+        { type: 'corn', cost: 125 },
+        { type: 'garlic', cost: 50 }
+    ];
+
+    plantsData.forEach(plant => {
+        const button = document.createElement('button');
+        button.textContent = `${plant.type} (${plant.cost} солнца)`;
+        button.addEventListener('click', () => {
+            if (sunCount >= plant.cost) {
+                sunCount -= plant.cost;
+                document.getElementById('sun-count').textContent = sunCount;
+                createPlant(plant.type, 100, 100, PIXI.Loader.shared.resources);
+            }
+        });
+        selectionDiv.appendChild(button);
+    });
+}
+
+// Создание растения
+function createPlant(type, x, y, resources) {
+    const textures = [
+        resources[`${type}1`].texture,
+        resources[`${type}2`].texture,
+        resources[`${type}3`].texture
+    ];
+
+    const plant = new PIXI.AnimatedSprite(textures);
+    plant.x = x;
+    plant.y = y;
+    plant.animationSpeed = 0.1;
+    plant.play();
+
+    if (type === 'peashooter' || type === 'snowpea' || type === 'repeater' || type === 'corn') {
+        plant.shoot = function() {
+            createProjectile(this.x + this.width / 2, this.y, type, PIXI.Loader.shared.resources);
+        };
+    }
+
+    plants.push(plant);
+    app.stage.addChild(plant);
+}
+
+// Создание зомби
+function createZombie(type, x, y, resources) {
+    const textures = [
+        resources[`${type}1`].texture,
+        resources[`${type}2`].texture,
+        resources[`${type}3`].texture
+    ];
+
+    const zombie = new PIXI.AnimatedSprite(textures);
+    zombie.x = x;
+    zombie.y = y;
+    zombie.animationSpeed = 0.1;
+    zombie.play();
+
+    zombies.push(zombie);
+    app.stage.addChild(zombie);
+
+    app.ticker.add(() => {
+        zombie.x -= 1;
+
+        // Проверка на столкновение с растением
+        plants.forEach(plant => {
+            if (detectCollision(zombie, plant)) {
+                // Логика взаимодействия с растением
+            }
+        });
+    });
+}
+
+// Создание снаряда
+function createProjectile(x, y, plantType, resources) {
+    let texture;
+    switch (plantType) {
+        case 'peashooter':
+            texture = PIXI.Loader.shared.resources['pea1'].texture;
+            break;
+        case 'snowpea':
+            texture = PIXI.Loader.shared.resources['snowpea_shoot1'].texture;
+            break;
+        case 'repeater':
+            texture = PIXI.Loader.shared.resources['repeater_pea1'].texture;
+            break;
+        case 'corn':
+            texture = PIXI.Loader.shared.resources['corn_shot1'].texture;
+            break;
+    }
+
+    const projectile = new PIXI.Sprite(texture);
+    projectile.x = x;
+    projectile.y = y;
+    app.stage.addChild(projectile);
+
+    app.ticker.add(() => {
+        projectile.x += 5;
+
+        // Проверка на столкновение с зомби
+        zombies.forEach(zombie => {
+            if (detectCollision(projectile, zombie)) {
+                app.stage.removeChild(zombie); // Удаление зомби
+                app.stage.removeChild(projectile); // Удаление снаряда
+            }
+        });
+
+        // Удаление снаряда после выхода за пределы экрана
+        if (projectile.x > app.screen.width) {
+            app.stage.removeChild(projectile);
         }
     });
 }
 
-// Получение уровня разблокировки для растения
-function getPlantUnlockLevel(plantType) {
-    const unlockLevels = {
-        sunflower: 1,
-        peashooter: 1,
-        wallnut: 1,
-        potatomine: 1,
-        snowpea: 2,
-        chili: 2,
-        repeater: 3,
-        corn: 3,
-        garlic: 4,
-        twinflower: 4,
-        magnetshroom: 5,
-        cattail: 5,
-        catapult: 5,
-        sunflower_hybrid: 6,
-        // Добавьте уровни для гибридных растений здесь
-    };
-    return unlockLevels[plantType] || Infinity;
+// Проверка на столкновение
+function detectCollision(sprite1, sprite2) {
+    return !(sprite1.x > sprite2.x + sprite2.width ||
+             sprite1.x + sprite1.width < sprite2.x ||
+             sprite1.y > sprite2.y + sprite2.height ||
+             sprite1.y + sprite1.height < sprite2.y);
 }
 
-// Выбор растения
-function selectPlant(plantType) {
-    selectedPlant = plantType;
-}
-
-// Добавление растения на поле
-function addPlant(cellIndex) {
-    if (selectedPlant) {
-        const cell = document.querySelector(`.cell[data-index="${cellIndex}"]`);
-        if (!cell.querySelector('.plant')) {
-            const plant = document.createElement('div');
-            plant.classList.add('plant', selectedPlant);
-            cell.appendChild(plant);
-            deductSunForPlant(selectedPlant);
-        }
-    }
-}
-
-// Уменьшение количества солнца при покупке растения
-function deductSunForPlant(plantType) {
-    const cost = allPlants[plantType].cost;
-    sunCount -= cost;
-    updateSunCount();
-}
-
-// Генерация солнца
-function generateSun() {
-    sunCount += 25;
-    updateSunCount();
-}
-
-// Обновление отображения количества солнца
-function updateSunCount() {
-    document.getElementById('sun-count').textContent = sunCount;
-}
-
-// Спавн зомби
-function spawnZombie() {
-    const gameBoard = document.getElementById('game-board');
-    const zombieTypes = Object.keys(allZombies);
-    const zombieType = zombieTypes[Math.floor(Math.random() * zombieTypes.length)];
-    const cellIndex = Math.floor(Math.random() * (rows * cols));
-    const cell = document.querySelector(`.cell[data-index="${cellIndex}"]`);
-    const zombie = document.createElement('div');
-    zombie.classList.add('zombie', zombieType);
-    cell.appendChild(zombie);
-
-    // Перемещение зомби
-    moveZombie(zombie, cellIndex);
-}
-
-// Перемещение зомби
-function moveZombie(zombie, startCellIndex) {
-    const interval = setInterval(() => {
-        const cell = document.querySelector(`.cell[data-index="${startCellIndex}"]`);
-        const nextCellIndex = startCellIndex + 1; // Пример движения вправо
-        const nextCell = document.querySelector(`.cell[data-index="${nextCellIndex}"]`);
-        if (nextCell) {
-            cell.removeChild(zombie);
-            nextCell.appendChild(zombie);
-            startCellIndex = nextCellIndex;
-        } else {
-            clearInterval(interval);
-            cell.removeChild(zombie);
-            gameOver();
-        }
-    }, 1000);
-}
-
-// Генерация новых уровней
-function generateNewLevels() {
-    alert('Генерация новых уровней не реализована.');
+// Начать игру
+function startGame() {
+    console.log('Игра началась!');
+    // Инициализировать игровой процесс
 }
 
 // Сброс игры
 function resetGame() {
-    clearInterval(gameInterval);
-    createBoard();
+    console.log('Игра сброшена!');
+    app.stage.removeChildren();
     sunCount = 0;
-    updateSunCount();
-    updatePlantSelection();
+    document.getElementById('sun-count').textContent = sunCount;
+    createPlantSelection();
 }
 
-// Начало игры
-function startGame() {
-    createBoard();
-    updatePlantSelection();
-    setInterval(generateSun, 10000); // Генерация солнца каждые 10 секунд
-    gameInterval = setInterval(spawnZombie, 5000); // Спавн зомби каждые 5 секунд
+// Генерация новых уровней
+function generateNewLevels() {
+    console.log('Генерация новых уровней...');
+    app.stage.removeChildren();
+    // Генерация нового уровня
+    createPlant('sunflower', 100, 100, PIXI.Loader.shared.resources);
+    createZombie('zombie_normal1', 800, 100, PIXI.Loader.shared.resources);
 }
-
-// Конец игры
-function gameOver() {
-    alert('Игра окончена!');
-    resetGame();
-}
-
-// Начало игры при загрузке
-document.addEventListener('DOMContentLoaded', () => {
-    createBoard();
-    document.querySelectorAll('.cell').forEach(cell => {
-        cell.addEventListener('click', () => addPlant(cell.dataset.index));
-    });
-});
