@@ -1,133 +1,36 @@
-/* Основные стили для страницы */
 body {
-    font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #f0f8ff;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
 }
 
 header {
-    background-color: #4caf50;
+    background-color: #4CAF50;
     color: white;
-    padding: 10px;
-    width: 100%;
     text-align: center;
+    padding: 10px 0;
 }
 
 main {
-    flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 100%;
 }
 
 #controls {
-    margin: 20px;
-    text-align: center;
-}
-
-button {
-    padding: 10px 20px;
-    font-size: 16px;
-    margin: 5px;
-    cursor: pointer;
+    margin: 20px 0;
 }
 
 #game-board {
-    display: grid;
-    grid-template-columns: repeat(9, 80px);
-    grid-template-rows: repeat(5, 80px);
-    gap: 5px;
-    background-color: #c8e6c9;
-    border: 5px solid #4caf50;
-    padding: 10px;
     width: 100%;
-    max-width: 720px; /* Максимальная ширина для ПК */
-    aspect-ratio: 9 / 5; /* Сохраняет пропорции на всех устройствах */
-}
-
-/* Стили для ячеек поля */
-.cell {
-    width: 100%;
-    height: 100%;
-    background-color: #8bc34a;
-    border: 2px solid #558b2f;
+    height: 80vh;
+    border: 2px solid #000;
     position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
 }
 
-.plant, .zombie {
-    position: absolute;
-    width: 70px;
-    height: 70px;
-    background-size: contain;
-    background-repeat: no-repeat;
-}
-
-.plant.sunflower { background-image: url('../res/normal/sunflower.png'); }
-.plant.peashooter { background-image: url('../res/normal/peashooter.png'); }
-.plant.wallnut { background-image: url('../res/normal/wallnut.png'); }
-.plant.potatomine { background-image: url('../res/normal/potatomine.png'); }
-.plant.snowpea { background-image: url('../res/normal/snowpea.png'); }
-.plant.chili { background-image: url('../res/normal/chili.png'); }
-.plant.repeater { background-image: url('../res/normal/repeater.png'); }
-.plant.corn { background-image: url('../res/normal/corn.png'); }
-.plant.garlic { background-image: url('../res/normal/garlic.png'); }
-.plant.twinflower { background-image: url('../res/normal/twinflower.png'); }
-.plant.magnetshroom { background-image: url('../res/normal/magnetshroom.png'); }
-.plant.cattail { background-image: url('../res/normal/cattail.png'); }
-.plant.catapult { background-image: url('../res/normal/catapult.png'); }
-
-.zombie.normal { background-image: url('../res/normal/zombie_normal.png'); }
-.zombie.conehead { background-image: url('../res/normal/zombie_conehead.png'); }
-.zombie.buckethead { background-image: url('../res/normal/zombie_buckethead.png'); }
-.zombie.runner { background-image: url('../res/normal/zombie_runner.png'); }
-
-/* Стили для смешанных растений */
-.plant.sunflower_hybrid { background-image: url('../res/hybrid/sunflower_hybrid.png'); }
-/* Другие смешанные растения добавьте аналогичным образом */
-
-/* Адаптивные стили для мобильных устройств */
-@media (max-width: 768px) {
-    #game-board {
-        grid-template-columns: repeat(6, 60px);
-        grid-template-rows: repeat(4, 60px);
-        max-width: 100%;
-        aspect-ratio: 6 / 4;
-    }
-
-    .cell {
-        width: 100%;
-        height: 100%;
-    }
-
-    button {
-        padding: 8px 16px;
-        font-size: 14px;
-    }
-}
-
-/* Стили для узких экранов, например, в вертикальной ориентации */
-@media (max-width: 480px) {
-    #game-board {
-        grid-template-columns: repeat(4, 50px);
-        grid-template-rows: repeat(5, 50px);
-        aspect-ratio: 4 / 5;
-    }
-
-    .cell {
-        width: 100%;
-        height: 100%;
-    }
-
-    button {
-        padding: 6px 12px;
-        font-size: 12px;
-    }
+button {
+    margin: 5px;
+    padding: 10px 20px;
+    font-size: 16px;
 }
