@@ -8,7 +8,7 @@ document.body.appendChild(app.view);
 
 // Загрузка ресурсов
 PIXI.Loader.shared
-    .add('sunflower', 'assets/res/normal/sunflower1.png')
+    .add('sunflower1', 'assets/res/normal/sunflower1.png')
     .add('sunflower2', 'assets/res/normal/sunflower2.png')
     .add('sunflower3', 'assets/res/normal/sunflower3.png')
     .add('peashooter1', 'assets/res/normal/peashooter1.png')
@@ -61,7 +61,6 @@ PIXI.Loader.shared
     .add('zombie_runner3', 'assets/res/normal/zombie_runner3.png')
     .add('sunflowerHybrid', 'assets/res/hybrid/sunflower.png')
     .add('peashooterHybrid', 'assets/res/hybrid/peashooter.png')
-    .add('wallnutHybrid', 'assets/res/hybrid/wallnut.png')
     .add('potatoMineHybrid', 'assets/res/hybrid/potato_mine.png')
     .add('chiliBeanHybrid', 'assets/res/hybrid/chili_bean.png')
     .add('zombieHybrid1', 'assets/res/hybrid/zombie1.png')
@@ -101,11 +100,10 @@ function createPlantSelection() {
         { type: 'peashooter', cost: 100 },
         { type: 'wallnut', cost: 50 },
         { type: 'potatoMine', cost: 25 },
-        { type: 'chiliBean', cost: 100 },
         { type: 'snowpea', cost: 75 },
-        { type: 'repeater', cost: 150 },
-        { type: 'corn', cost: 125 },
-        { type: 'garlic', cost: 50 }
+        { type: 'chiliBean', cost: 100 },
+        { type: 'repeater', cost: 200 },
+        { type: 'corn', cost: 125 }
     ];
 
     plantsData.forEach(plant => {
@@ -115,20 +113,77 @@ function createPlantSelection() {
             if (sunCount >= plant.cost) {
                 sunCount -= plant.cost;
                 document.getElementById('sun-count').textContent = sunCount;
-                createPlant(plant.type, 100, 100, PIXI.Loader.shared.resources);
+                // Логика размещения растения на игровом поле
+                placePlant(plant.type);
+            } else {
+                alert('Недостаточно солнца!');
             }
         });
         selectionDiv.appendChild(button);
     });
 }
 
+// Размещение растения
+function placePlant(type) {
+    // Здесь нужно реализовать логику размещения растения на игровом поле
+    // В зависимости от типа растения, создаем соответствующий объект
+    createPlant(type, 100, 100, PIXI.Loader.shared.resources);
+}
+
 // Создание растения
 function createPlant(type, x, y, resources) {
-    const textures = [
-        resources[`${type}1`].texture,
-        resources[`${type}2`].texture,
-        resources[`${type}3`].texture
-    ];
+    let textures;
+    switch (type) {
+        case 'sunflower':
+            textures = [
+                resources['sunflower1'].texture,
+                resources['sunflower2'].texture,
+                resources['sunflower3'].texture
+            ];
+            break;
+        case 'peashooter':
+            textures = [
+                resources['peashooter1'].texture,
+                resources['peashooter2'].texture,
+                resources['peashooter3'].texture
+            ];
+            break;
+        case 'potatoMine':
+            textures = [
+                resources['potatomine1'].texture,
+                resources['potatomine2'].texture,
+                resources['potatomine3'].texture
+            ];
+            break;
+        case 'snowpea':
+            textures = [
+                resources['snowpea1'].texture,
+                resources['snowpea2'].texture,
+                resources['snowpea3'].texture
+            ];
+            break;
+        case 'chiliBean':
+            textures = [
+                resources['chili1'].texture,
+                resources['chili2'].texture,
+                resources['chili3'].texture
+            ];
+            break;
+        case 'repeater':
+            textures = [
+                resources['repeater1'].texture,
+                resources['repeater2'].texture,
+                resources['repeater3'].texture
+            ];
+            break;
+        case 'corn':
+            textures = [
+                resources['corn1'].texture,
+                resources['corn2'].texture,
+                resources['corn3'].texture
+            ];
+            break;
+    }
 
     const plant = new PIXI.AnimatedSprite(textures);
     plant.x = x;
@@ -136,23 +191,50 @@ function createPlant(type, x, y, resources) {
     plant.animationSpeed = 0.1;
     plant.play();
 
-    if (type === 'peashooter' || type === 'snowpea' || type === 'repeater' || type === 'corn') {
-        plant.shoot = function() {
-            createProjectile(this.x + this.width / 2, this.y, type, PIXI.Loader.shared.resources);
-        };
-    }
-
     plants.push(plant);
     app.stage.addChild(plant);
+
+    // Установка логики для стрельбы снарядов и других действий
+    if (type === 'peashooter' || type === 'snowpea' || type === 'repeater' || type === 'corn') {
+        setInterval(() => {
+            createProjectile(plant.x + 50, plant.y + 20, type, PIXI.Loader.shared.resources);
+        }, 2000); // Стреляет каждые 2 секунды
+    }
 }
 
 // Создание зомби
 function createZombie(type, x, y, resources) {
-    const textures = [
-        resources[`${type}1`].texture,
-        resources[`${type}2`].texture,
-        resources[`${type}3`].texture
-    ];
+    let textures;
+    switch (type) {
+        case 'zombie_normal1':
+            textures = [
+                resources['zombie_normal1'].texture,
+                resources['zombie_normal2'].texture,
+                resources['zombie_normal3'].texture
+            ];
+            break;
+        case 'zombie_buckethead1':
+            textures = [
+                resources['zombie_buckethead1'].texture,
+                resources['zombie_buckethead2'].texture,
+                resources['zombie_buckethead3'].texture
+            ];
+            break;
+        case 'zombie_conehead1':
+            textures = [
+                resources['zombie_conehead1'].texture,
+                resources['zombie_conehead2'].texture,
+                resources['zombie_conehead3'].texture
+            ];
+            break;
+        case 'zombie_runner1':
+            textures = [
+                resources['zombie_runner1'].texture,
+                resources['zombie_runner2'].texture,
+                resources['zombie_runner3'].texture
+            ];
+            break;
+    }
 
     const zombie = new PIXI.AnimatedSprite(textures);
     zombie.x = x;
@@ -180,16 +262,16 @@ function createProjectile(x, y, plantType, resources) {
     let texture;
     switch (plantType) {
         case 'peashooter':
-            texture = PIXI.Loader.shared.resources['pea1'].texture;
+            texture = resources['pea1'].texture;
             break;
         case 'snowpea':
-            texture = PIXI.Loader.shared.resources['snowpea_shoot1'].texture;
+            texture = resources['snowpea_shoot1'].texture;
             break;
         case 'repeater':
-            texture = PIXI.Loader.shared.resources['repeater_pea1'].texture;
+            texture = resources['repeater_pea1'].texture;
             break;
         case 'corn':
-            texture = PIXI.Loader.shared.resources['corn_shot1'].texture;
+            texture = resources['corn_shot1'].texture;
             break;
     }
 
