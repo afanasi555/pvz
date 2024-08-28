@@ -14,14 +14,13 @@
 
     <main>
         <div id="controls">
-            <button onclick="selectPlant('sunflower')">Подсолнух</button>
-            <button onclick="selectPlant('peashooter')">Стрелок</button>
-            <button onclick="selectPlant('wallnut')">Орех</button>
-            <button onclick="selectPlant('potatomine')">Мина</button>
-            <button onclick="selectPlant('snowpea')">Замораживающий стрелок</button>
+            <div id="plant-selection">
+                <!-- Кнопки для выбора растений будут динамически добавлены -->
+            </div>
             <div>Солнца: <span id="sun-count">0</span></div>
             <button onclick="resetGame()">Сброс</button>
             <button onclick="startGame()">Начать игру</button>
+            <button onclick="generateNewLevels()">Добавить новые уровни</button>
         </div>
 
         <div id="game-board"></div>
