@@ -2,8 +2,37 @@ const rows = 5;
 const cols = 9;
 let sunCount = 0;
 const plants = [];
+const unlockedPlants = [];
 let selectedPlant = null;
 let gameInterval;
+let currentLevel = 1;
+
+// Все доступные растения
+const allPlants = {
+    sunflower: { cost: 50 },
+    peashooter: { cost: 100 },
+    wallnut: { cost: 50 },
+    potatomine: { cost: 25 },
+    snowpea: { cost: 150 },
+    chili: { cost: 100 },
+    repeater: { cost: 200 },
+    corn: { cost: 125 },
+    garlic: { cost: 75 },
+    twinflower: { cost: 150 },
+    magnetshroom: { cost: 200 },
+    cattail: { cost: 175 },
+    catapult: { cost: 250 },
+    sunflower_hybrid: { cost: 100 },
+    // Добавьте другие гибридные растения здесь
+};
+
+// Все доступные зомби
+const allZombies = {
+    normal: { speed: 1 },
+    conehead: { speed: 1.2 },
+    buckethead: { speed: 1.5 },
+    runner: { speed: 1.8 }
+};
 
 // Создание игрового поля
 function createBoard() {
@@ -17,6 +46,43 @@ function createBoard() {
     }
 }
 
+// Добавление кнопок для выбора растений
+function updatePlantSelection() {
+    const plantSelection = document.getElementById('plant-selection');
+    plantSelection.innerHTML = ''; // Очистить предыдущие кнопки
+
+    Object.keys(allPlants).forEach(plantType => {
+        if (currentLevel >= getPlantUnlockLevel(plantType)) {
+            const button = document.createElement('button');
+            button.textContent = plantType.charAt(0).toUpperCase() + plantType.slice(1);
+            button.onclick = () => selectPlant(plantType);
+            plantSelection.appendChild(button);
+        }
+    });
+}
+
+// Получение уровня разблокировки для растения
+function getPlantUnlockLevel(plantType) {
+    const unlockLevels = {
+        sunflower: 1,
+        peashooter: 1,
+        wallnut: 1,
+        potatomine: 1,
+        snowpea: 2,
+        chili: 2,
+        repeater: 3,
+        corn: 3,
+        garlic: 4,
+        twinflower: 4,
+        magnetshroom: 5,
+        cattail: 5,
+        catapult: 5,
+        sunflower_hybrid: 6,
+        // Добавьте уровни для гибридных растений здесь
+    };
+    return unlockLevels[plantType] || Infinity;
+}
+
 // Выбор растения
 function selectPlant(plantType) {
     selectedPlant = plantType;
@@ -24,101 +90,71 @@ function selectPlant(plantType) {
 
 // Добавление растения на поле
 function addPlant(cellIndex) {
-    if (selectedPlant && canAffordPlant(selectedPlant)) {
+    if (selectedPlant) {
         const cell = document.querySelector(`.cell[data-index="${cellIndex}"]`);
         if (!cell.querySelector('.plant')) {
             const plant = document.createElement('div');
             plant.classList.add('plant', selectedPlant);
             cell.appendChild(plant);
-            plants.push({ type: selectedPlant, position: cellIndex });
             deductSunForPlant(selectedPlant);
         }
     }
 }
 
-// Проверка на наличие ресурсов для покупки растения
-function canAffordPlant(plantType) {
-    const cost = getPlantCost(plantType);
-    return sunCount >= cost;
-}
-
-// Получение стоимости растения
-function getPlantCost(plantType) {
-    switch (plantType) {
-        case 'sunflower': return 50;
-        case 'peashooter': return 100;
-        case 'wallnut': return 50;
-        case 'potatomine': return 25;
-        case 'snowpea': return 150;
-        default: return 0;
-    }
-}
-
-// Вычитание ресурсов после покупки
+// Уменьшение количества солнца при покупке растения
 function deductSunForPlant(plantType) {
-    sunCount -= getPlantCost(plantType);
+    const cost = allPlants[plantType].cost;
+    sunCount -= cost;
     updateSunCount();
 }
 
-// Обновление количества солнц на экране
-function updateSunCount() {
-    document.getElementById('sun-count').innerText = sunCount;
-}
-
-// Генерация солнц Подсолнухами
+// Генерация солнца
 function generateSun() {
     sunCount += 25;
     updateSunCount();
 }
 
+// Обновление отображения количества солнца
+function updateSunCount() {
+    document.getElementById('sun-count').textContent = sunCount;
+}
+
 // Спавн зомби
 function spawnZombie() {
-    const row = Math.floor(Math.random() * rows);
+    const gameBoard = document.getElementById('game-board');
+    const zombieTypes = Object.keys(allZombies);
+    const zombieType = zombieTypes[Math.floor(Math.random() * zombieTypes.length)];
+    const cellIndex = Math.floor(Math.random() * (rows * cols));
+    const cell = document.querySelector(`.cell[data-index="${cellIndex}"]`);
     const zombie = document.createElement('div');
-    zombie.classList.add('zombie', getRandomZombieType());
-    const startCell = document.querySelector(`.cell[data-index="${row * cols + (cols - 1)}"]`);
-    startCell.appendChild(zombie);
-    moveZombie(zombie, row * cols + (cols - 1));
+    zombie.classList.add('zombie', zombieType);
+    cell.appendChild(zombie);
+
+    // Перемещение зомби
+    moveZombie(zombie, cellIndex);
 }
 
-// Рандомный выбор зомби
-function getRandomZombieType() {
-    const zombies = ['normal', 'conehead', 'buckethead', 'runner'];
-    return zombies[Math.floor(Math.random() * zombies.length)];
-}
-
-// Движение зомби
-function moveZombie(zombie, startPos) {
-    let zombiePos = startPos;
-    const moveInterval = setInterval(() => {
-        const nextCell = document.querySelector(`.cell[data-index="${--zombiePos}"]`);
-        if (!nextCell) {
-            clearInterval(moveInterval);
-            gameOver();
-            return;
-        }
-        const plant = nextCell.querySelector('.plant');
-        if (plant) {
-            // Зомби атакует растение
-            nextCell.removeChild(plant);
-            clearInterval(moveInterval);
-        } else {
-            const currentCell = document.querySelector(`.cell[data-index="${zombiePos + 1}"]`);
-            currentCell.removeChild(zombie);
+// Перемещение зомби
+function moveZombie(zombie, startCellIndex) {
+    const interval = setInterval(() => {
+        const cell = document.querySelector(`.cell[data-index="${startCellIndex}"]`);
+        const nextCellIndex = startCellIndex + 1; // Пример движения вправо
+        const nextCell = document.querySelector(`.cell[data-index="${nextCellIndex}"]`);
+        if (nextCell) {
+            cell.removeChild(zombie);
             nextCell.appendChild(zombie);
-        }
-        if (zombiePos % cols === 0) {
-            clearInterval(moveInterval);
+            startCellIndex = nextCellIndex;
+        } else {
+            clearInterval(interval);
+            cell.removeChild(zombie);
             gameOver();
         }
     }, 1000);
 }
 
-// Запуск игры
-function startGame() {
-    createBoard();
-    setInterval(generateSun, 10000); // Генерация солнца каждые 10 секунд
-    gameInterval = setInterval(spawnZombie, 5000); // Спавн зомби каждые 5 секунд
+// Генерация новых уровней
+function generateNewLevels() {
+    alert('Генерация новых уровней не реализована.');
 }
 
 // Сброс игры
@@ -127,6 +163,15 @@ function resetGame() {
     createBoard();
     sunCount = 0;
     updateSunCount();
+    updatePlantSelection();
+}
+
+// Начало игры
+function startGame() {
+    createBoard();
+    updatePlantSelection();
+    setInterval(generateSun, 10000); // Генерация солнца каждые 10 секунд
+    gameInterval = setInterval(spawnZombie, 5000); // Спавн зомби каждые 5 секунд
 }
 
 // Конец игры
