@@ -1,0 +1,49 @@
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background-color: #f0f8ff;
+}
+#game-board {
+    display: grid;
+    grid-template-columns: repeat(9, 80px);
+    grid-template-rows: repeat(5, 80px);
+    gap: 5px;
+    margin: 0 auto;
+    background-color: #c8e6c9;
+    border: 5px solid #4caf50;
+    padding: 10px;
+}
+.cell {
+    width: 80px;
+    height: 80px;
+    background-color: #8bc34a;
+    border: 2px solid #558b2f;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.plant, .zombie {
+    position: absolute;
+    width: 70px;
+    height: 70px;
+}
+.plant.sunflower { background-image: url('../res/sunflower.png'); background-size: contain; }
+.plant.peashooter { background-image: url('../res/peashooter.png'); background-size: contain; }
+.plant.wallnut { background-image: url('../res/wallnut.png'); background-size: contain; }
+.plant.potatomine { background-image: url('../res/potatomine.png'); background-size: contain; }
+.plant.snowpea { background-image: url('../res/snowpea.png'); background-size: contain; }
+
+.zombie.normal { background-image: url('../res/zombie_normal.png'); background-size: contain; }
+.zombie.conehead { background-image: url('../res/zombie_conehead.png'); background-size: contain; }
+.zombie.buckethead { background-image: url('../res/zombie_buckethead.png'); background-size: contain; }
+.zombie.runner { background-image: url('../res/zombie_runner.png'); background-size: contain; }
+
+#controls {
+    margin: 20px;
+}
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+    margin: 5px;
+}
