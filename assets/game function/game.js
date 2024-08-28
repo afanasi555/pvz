@@ -114,32 +114,31 @@ function moveZombie(zombie, startPos) {
     }, 1000);
 }
 
-// Конец игры
-function gameOver() {
-    clearInterval(gameInterval);
-    alert("Зомби победили! Игра окончена.");
+// Запуск игры
+function startGame() {
+    createBoard();
+    setInterval(generateSun, 10000); // Генерация солнца каждые 10 секунд
+    gameInterval = setInterval(spawnZombie, 5000); // Спавн зомби каждые 5 секунд
 }
 
 // Сброс игры
 function resetGame() {
     clearInterval(gameInterval);
+    createBoard();
     sunCount = 0;
     updateSunCount();
-    createBoard();
-    plants.length = 0; // Очистить список растений
 }
 
-// Начало игры
-function startGame() {
-    if (gameInterval) clearInterval(gameInterval);
-    gameInterval = setInterval(spawnZombie, 2000); // Спавн зомби каждые 2 секунды
+// Конец игры
+function gameOver() {
+    alert('Игра окончена!');
+    resetGame();
 }
 
-// Инициализация игрового поля
-window.onload = () => {
+// Начало игры при загрузке
+document.addEventListener('DOMContentLoaded', () => {
     createBoard();
     document.querySelectorAll('.cell').forEach(cell => {
         cell.addEventListener('click', () => addPlant(cell.dataset.index));
     });
-    setInterval(generateSun, 5000); // Подсолнухи генерируют солнца каждые 5 секунд
-};
+});
