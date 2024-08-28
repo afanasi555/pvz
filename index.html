@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zombies vs Plants</title>
+    <link rel="stylesheet" href="assets/game function/style.css">
+</head>
+<body>
+
+    <h1>Zombies vs Plants</h1>
+    <div id="controls">
+        <button onclick="selectPlant('sunflower')">Подсолнух</button>
+        <button onclick="selectPlant('peashooter')">Стрелок</button>
+        <button onclick="selectPlant('wallnut')">Орех</button>
+        <button onclick="selectPlant('potatomine')">Мина</button>
+        <button onclick="selectPlant('snowpea')">Замораживающий стрелок</button>
+        <div>Солнца: <span id="sun-count">0</span></div>
+    </div>
+    <div id="game-board"></div>
+
+    <script src="assets/game function/game.js"></script>
+
+</body>
+</html>
