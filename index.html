@@ -5,354 +5,125 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Plants vs Zombies</title>
     <style>
-        body {
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-            background-color: #87CEEB;
-        }
-        #gameCanvas {
-            border: 1px solid #000;
-            background: url('https://github.com/afanasi555/pvz/blob/main/assets/res/lawnmower/lawnmower.png?raw=true') no-repeat;
-            background-size: cover;
-            display: block;
-            margin: 0 auto;
-        }
-        #statusBar, #progressBar {
-            background: #333;
-            color: #fff;
-            padding: 10px;
-            text-align: center;
-            position: fixed;
-            width: 100%;
-            z-index: 10;
-        }
-        #statusBar { top: 0; }
-        #progressBar { bottom: 0; }
-        #shop {
-            position: absolute;
-            right: 0;
-            top: 0;
-            width: 200px;
-            background: #fff;
-            border: 1px solid #000;
-            padding: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-            z-index: 20;
-        }
-        #shop img, #plantOptions img {
-            width: 80px;
-            height: 80px;
-            cursor: pointer;
-            margin: 5px;
-        }
-        #shop button, #endScreen button {
-            display: block;
-            width: 100%;
-            margin-top: 10px;
-            padding: 10px;
-            background: #f00;
-            color: #fff;
-            border: none;
-            cursor: pointer;
-        }
-        #shop button:hover, #endScreen button:hover {
-            background: #c00;
-        }
-        #endScreen {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: #fff;
-            border: 1px solid #000;
-            padding: 20px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-            text-align: center;
-            z-index: 30;
-        }
-        #endScreen img {
-            width: 100px;
-            height: 100px;
-        }
-        #plantOptions {
-            position: absolute;
-            top: 100px;
-            right: 0;
-            width: 200px;
-            background: #fff;
-            border: 1px solid #000;
-            padding: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-            z-index: 20;
-        }
-        .cell {
-            width: 80px;
-            height: 80px;
-            border: 1px solid #999;
-            float: left;
-            position: relative;
-        }
-        @media (max-width: 768px) {
-            #gameCanvas {
-                width: 100%;
-                height: auto;
-            }
-            #shop, #plantOptions {
-                width: 100%;
-                right: 0;
-                top: auto;
-                bottom: 0;
-            }
-        }
+        body { margin: 0; padding: 0; font-family: Arial, sans-serif; }
+        canvas { display: block; margin: 0 auto; background: #cce5ff; }
+        #controls { text-align: center; margin: 10px; }
+        #store { position: absolute; top: 0; right: 0; background: #fff; padding: 10px; border: 1px solid #000; }
+        #store button { margin: 5px; }
+        #lawnmower { position: absolute; bottom: 0; width: 100%; height: 80px; background: url('https://github.com/afanasi555/pvz/blob/main/assets/res/lawnmower/lawnmower.png') no-repeat center center; background-size: cover; }
+        #progress { position: absolute; top: 10px; left: 10px; font-size: 18px; background: #fff; padding: 10px; border: 1px solid #000; }
+        .plant, .zombie { position: absolute; width: 80px; height: 80px; }
+        #mainMenu { text-align: center; margin: 20px; }
     </style>
 </head>
 <body>
-    <div id="statusBar">
-        Coins: <span id="coins">50</span> | Suns: <span id="suns">0</span> | Lawn Mower Status: <span id="mowerStatus">Idle</span>
+    <div id="mainMenu">
+        <h1>Plants vs Zombies</h1>
+        <button onclick="startGame()">Start Game</button>
     </div>
+    <div id="controls" style="display: none;">
+        <div id="progress">Coins: 50 | Suns: 0 | Lawnmower Status: Idle</div>
+        <button onclick="toggleStore()">Store</button>
+    </div>
+    <div id="store" style="display: none;">
+        <button onclick="buyPlant('sunflower')">Sunflower (50 Suns)</button>
+        <button onclick="buyPlant('peashooter')">Peashooter (100 Suns)</button>
+        <button onclick="closeStore()">Close Store</button>
+    </div>
+    <div id="lawnmower"></div>
     <canvas id="gameCanvas" width="800" height="600"></canvas>
-    <div id="plantOptions">
-        <h3>Select Plant</h3>
-        <img src="https://github.com/afanasi555/pvz/blob/main/assets/res/normal/sunflower1.png?raw=true" alt="Sunflower" data-type="sunflower" class="plant">
-        <img src="https://github.com/afanasi555/pvz/blob/main/assets/res/normal/Peashooter1.png?raw=true" alt="Peashooter" data-type="peashooter" class="plant">
-    </div>
-    <div id="shop">
-        <h3>Shop</h3>
-        <img src="https://github.com/afanasi555/pvz/blob/main/assets/res/normal/sunflower1.png?raw=true" alt="Sunflower" data-type="sunflower" class="shop-item">
-        <img src="https://github.com/afanasi555/pvz/blob/main/assets/res/normal/Peashooter1.png?raw=true" alt="Peashooter" data-type="peashooter" class="shop-item">
-        <button id="closeShop">Close Shop</button>
-    </div>
-    <div id="endScreen">
-        <img src="https://github.com/afanasi555/pvz/blob/main/assets/res/normal/sunflower1.png?raw=true" alt="Plant">
-        <p>You won!</p>
-        <button id="continueButton">Continue</button>
-    </div>
-    <div id="progressBar">Level Progress: <span id="progress">0%</span></div>
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
-        const coinsElem = document.getElementById('coins');
-        const sunsElem = document.getElementById('suns');
-        const mowerStatusElem = document.getElementById('mowerStatus');
-        const shop = document.getElementById('shop');
-        const closeShopButton = document.getElementById('closeShop');
-        const endScreen = document.getElementById('endScreen');
-        const continueButton = document.getElementById('continueButton');
-        const plantOptions = document.getElementById('plantOptions');
-        const progressElem = document.getElementById('progress');
 
-        let coins = 50;
         let suns = 0;
-        let currentLevel = 1;
+        let coins = 50;
         let plants = [];
         let zombies = [];
-        let levelProgress = 0;
-        let selectedPlant = null;
-        let plantCost = {sunflower: 50, peashooter: 100}; // Example costs
-        let plantTypes = {
-            sunflower: {cost: 50, width: 80, height: 80, animation: [
-                'https://github.com/afanasi555/pvz/blob/main/assets/res/normal/sunflower1.png?raw=true',
-                'https://github.com/afanasi555/pvz/blob/main/assets/res/normal/sunflower2.png?raw=true',
-                'https://github.com/afanasi555/pvz/blob/main/assets/res/normal/sunflower3.png?raw=true'
-            ]},
-            peashooter: {cost: 100, width: 80, height: 80, animation: [
-                'https://github.com/afanasi555/pvz/blob/main/assets/res/normal/Peashooter1.png?raw=true',
-                'https://github.com/afanasi555/pvz/blob/main/assets/res/normal/Peashooter2.png?raw=true',
-                'https://github.com/afanasi555/pvz/blob/main/assets/res/normal/Peashooter3.png?raw=true'
-            ]}
-        };
-        let zombiesTypes = {
-            normal: {speed: 1, animation: [
-                'https://github.com/afanasi555/pvz/blob/main/assets/res/normal/zombie_normal1.png?raw=true',
-                'https://github.com/afanasi555/pvz/blob/main/assets/res/normal/zombie_normal2.png?raw=true',
-                'https://github.com/afanasi555/pvz/blob/main/assets/res/normal/zombie_normal3.png?raw=true'
-            ]},
-            buckethead: {speed: 0.8, animation: [
-                'https://github.com/afanasi555/pvz/blob/main/assets/res/normal/zombie_buckethead1.png?raw=true',
-                'https://github.com/afanasi555/pvz/blob/main/assets/res/normal/zombie_buckethead2.png?raw=true',
-                'https://github.com/afanasi555/pvz/blob/main/assets/res/normal/zombie_buckethead3.png?raw=true'
-            ]},
-            conehead: {speed: 0.9, animation: [
-                'https://github.com/afanasi555/pvz/blob/main/assets/res/normal/zombie_conehead1.png?raw=true',
-                'https://github.com/afanasi555/pvz/blob/main/assets/res/normal/zombie_conehead2.png?raw=true',
-                'https://github.com/afanasi555/pvz/blob/main/assets/res/normal/zombie_conehead3.png?raw=true'
-            ]},
-            runner: {speed: 1.2, animation: [
-                'https://github.com/afanasi555/pvz/blob/main/assets/res/normal/zombie_runner1.png?raw=true',
-                'https://github.com/afanasi555/pvz/blob/main/assets/res/normal/zombie_runner2.png?raw=true',
-                'https://github.com/afanasi555/pvz/blob/main/assets/res/normal/zombie_runner3.png?raw=true'
-            ]}
-        };
+        let storeOpen = false;
+        let plantSelected = null;
 
-        function updateStatus() {
-            coinsElem.textContent = coins;
-            sunsElem.textContent = suns;
-            mowerStatusElem.textContent = 'Idle';
-            progressElem.textContent = `${levelProgress}%`;
+        function drawText(text, x, y) {
+            ctx.fillStyle = 'black';
+            ctx.font = '20px Arial';
+            ctx.fillText(text, x, y);
         }
 
-        function drawPlant(type, x, y) {
-            if (plantTypes[type]) {
-                const plant = plantTypes[type];
-                const img = new Image();
-                img.src = plant.animation[0];
-                img.onload = () => {
-                    ctx.drawImage(img, x, y, plant.width, plant.height);
-                };
+        function drawLawnmower() {
+            const lawnmowerImg = new Image();
+            lawnmowerImg.src = 'https://github.com/afanasi555/pvz/blob/main/assets/res/lawnmower/lawnmower.png';
+            lawnmowerImg.onload = () => ctx.drawImage(lawnmowerImg, 0, canvas.height - 80, canvas.width, 80);
+        }
+
+        function startGame() {
+            document.getElementById('mainMenu').style.display = 'none';
+            document.getElementById('controls').style.display = 'block';
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawLawnmower();
+            drawText('Level 1', canvas.width / 2 - 40, 30);
+        }
+
+        function toggleStore() {
+            storeOpen = !storeOpen;
+            document.getElementById('store').style.display = storeOpen ? 'block' : 'none';
+        }
+
+        function buyPlant(plantType) {
+            if (plantType === 'sunflower' && suns >= 50) {
+                suns -= 50;
+                plantSelected = plantType;
+            } else if (plantType === 'peashooter' && suns >= 100) {
+                suns -= 100;
+                plantSelected = plantType;
             }
+            updateProgress();
         }
 
-        function animatePlant(plant) {
-            if (plantTypes[plant.type]) {
-                const plantData = plantTypes[plant.type];
-                let frame = 0;
-                function update() {
-                    ctx.clearRect(plant.x, plant.y, plantData.width, plantData.height);
-                    const img = new Image();
-                    img.src = plantData.animation[frame];
-                    img.onload = () => {
-                        ctx.drawImage(img, plant.x, plant.y, plantData.width, plantData.height);
-                    };
-                    frame = (frame + 1) % plantData.animation.length;
-                    setTimeout(update, 500); // Change frame every 500ms
-                }
-                update();
-            }
-        }
-
-        function drawZombie(zombie) {
-            if (zombiesTypes[zombie.type]) {
-                const zombieData = zombiesTypes[zombie.type];
-                const img = new Image();
-                img.src = zombieData.animation[0];
-                img.onload = () => {
-                    ctx.drawImage(img, zombie.x, zombie.y, 80, 80);
-                };
-            }
-        }
-
-        function animateZombie(zombie) {
-            if (zombiesTypes[zombie.type]) {
-                const zombieData = zombiesTypes[zombie.type];
-                let frame = 0;
-                function update() {
-                    ctx.clearRect(zombie.x, zombie.y, 80, 80);
-                    const img = new Image();
-                    img.src = zombieData.animation[frame];
-                    img.onload = () => {
-                        ctx.drawImage(img, zombie.x, zombie.y, 80, 80);
-                    };
-                    frame = (frame + 1) % zombieData.animation.length;
-                    setTimeout(update, 500); // Change frame every 500ms
-                }
-                update();
-            }
-        }
-
-        function moveZombies() {
-            zombies.forEach(zombie => {
-                zombie.x -= zombiesTypes[zombie.type].speed;
-                // Check for collision with plants
-                plants.forEach(plant => {
-                    if (zombie.x < plant.x + plantTypes[plant.type].width &&
-                        zombie.x + 80 > plant.x &&
-                        zombie.y < plant.y + plantTypes[plant.type].height &&
-                        zombie.y + 80 > plant.y) {
-                        // Zombie collided with plant
-                        console.log('Collision detected!');
-                        // Implement collision logic here
-                    }
-                });
-            });
-        }
-
-        function updateZombies() {
-            moveZombies();
-            zombies.forEach(zombie => {
-                animateZombie(zombie);
-            });
-        }
-
-        function spawnZombie() {
-            const types = Object.keys(zombiesTypes);
-            const type = types[Math.floor(Math.random() * types.length)];
-            zombies.push({
-                type: type,
-                x: canvas.width,
-                y: Math.random() * (canvas.height - 80)
-            });
-        }
-
-        function initializeLevel() {
-            levelProgress = 0;
-            updateStatus();
-            spawnZombie(); // For example, spawn a zombie at the start
-        }
-
-        function startLevel() {
-            initializeLevel();
-            // Start spawning zombies and progressing through the level
-        }
-
-        function handleClick(event) {
-            if (selectedPlant) {
-                const x = event.offsetX - (plantTypes[selectedPlant].width / 2);
-                const y = event.offsetY - (plantTypes[selectedPlant].height / 2);
-                if (suns >= plantTypes[selectedPlant].cost) {
-                    suns -= plantTypes[selectedPlant].cost;
-                    updateStatus();
-                    drawPlant(selectedPlant, x, y);
-                    plants.push({ type: selectedPlant, x, y });
-                    animatePlant({ type: selectedPlant, x, y });
-                } else {
-                    alert('Not enough suns!');
-                }
-                selectedPlant = null;
-            }
-        }
-
-        function handlePlantClick(event) {
-            selectedPlant = event.target.dataset.type;
-        }
-
-        function closeShop() {
-            shop.style.display = 'none';
-        }
-
-        function endGame() {
-            endScreen.style.display = 'block';
-        }
-
-        function continueGame() {
-            endScreen.style.display = 'none';
-            currentLevel++;
-            initializeLevel();
+        function closeStore() {
+            storeOpen = false;
+            document.getElementById('store').style.display = 'none';
         }
 
         function updateProgress() {
-            levelProgress += 10; // Example increment
-            progressElem.textContent = `${levelProgress}%`;
-            if (levelProgress >= 100) {
-                endGame(); // End game when progress reaches 100%
+            document.getElementById('progress').textContent = `Coins: ${coins} | Suns: ${suns} | Lawnmower Status: Idle`;
+        }
+
+        canvas.addEventListener('click', (event) => {
+            if (!storeOpen && plantSelected) {
+                const rect = canvas.getBoundingClientRect();
+                const x = event.clientX - rect.left;
+                const y = event.clientY - rect.top;
+                ctx.fillStyle = plantSelected === 'sunflower' ? 'yellow' : 'green';
+                ctx.fillRect(x - 40, y - 40, 80, 80);
+                plants.push({ type: plantSelected, x, y });
+                plantSelected = null;
+                updateProgress();
             }
+        });
+
+        // Simple zombie logic
+        function spawnZombie() {
+            const zombieImg = new Image();
+            zombieImg.src = 'https://github.com/afanasi555/pvz/blob/main/assets/res/normal/zombie_norma1.png';
+            zombies.push({ x: canvas.width, y: Math.random() * canvas.height, img: zombieImg });
         }
 
-        function init() {
-            updateStatus();
-            initializeLevel();
-            document.querySelectorAll('#plantOptions .plant').forEach(img => {
-                img.addEventListener('click', handlePlantClick);
+        function updateZombies() {
+            zombies.forEach(zombie => {
+                zombie.x -= 1;
+                ctx.drawImage(zombie.img, zombie.x, zombie.y, 80, 80);
             });
-            canvas.addEventListener('click', handleClick);
-            closeShopButton.addEventListener('click', closeShop);
-            continueButton.addEventListener('click', continueGame);
-            setInterval(updateZombies, 1000); // Update zombies every second
-            setInterval(updateProgress, 5000); // Update level progress every 5 seconds
         }
 
-        init();
+        function gameLoop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawLawnmower();
+            updateZombies();
+            requestAnimationFrame(gameLoop);
+        }
+
+        setInterval(spawnZombie, 5000);
+        gameLoop();
     </script>
 </body>
 </html>
