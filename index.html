@@ -9,6 +9,7 @@
             margin: 0;
             overflow: hidden;
             font-family: Arial, sans-serif;
+            background-color: #87CEEB; /* Цвет фона как небо */
         }
         canvas {
             display: block;
@@ -16,7 +17,7 @@
         .hidden {
             display: none;
         }
-        .menu {
+        .menu, .shop {
             position: absolute;
             top: 20px;
             left: 20px;
@@ -26,7 +27,7 @@
             padding: 20px;
             border-radius: 10px;
         }
-        .menu button {
+        .menu button, .shop button {
             background-color: #4CAF50;
             color: white;
             border: none;
@@ -35,8 +36,46 @@
             cursor: pointer;
             border-radius: 5px;
         }
-        .menu button:hover {
+        .menu button:hover, .shop button:hover {
             background-color: #45a049;
+        }
+        .shop {
+            top: 70px;
+        }
+        .shop h2 {
+            margin-top: 0;
+        }
+        .field {
+            position: absolute;
+            bottom: 10px;
+            left: 20px;
+            z-index: 1;
+            background: rgba(0, 0, 0, 0.7);
+            color: #fff;
+            padding: 10px;
+            border-radius: 10px;
+        }
+        .field button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .field button:hover {
+            background-color: #45a049;
+        }
+        .status {
+            position: absolute;
+            top: 100px;
+            left: 20px;
+            z-index: 1;
+            background: rgba(0, 0, 0, 0.7);
+            color: #fff;
+            padding: 10px;
+            border-radius: 10px;
         }
     </style>
 </head>
@@ -46,6 +85,25 @@
         <button onclick="startGame()">Start Game</button>
         <button onclick="showInstructions()">Instructions</button>
     </div>
+    <div id="shop" class="shop hidden">
+        <h2>Shop</h2>
+        <button onclick="buyPlant('sunflower')">Sunflower (100 Coins)</button>
+        <button onclick="buyPlant('peashooter')">Peashooter (150 Coins)</button>
+        <button onclick="buyPlant('potatomine')">Potato Mine (200 Coins)</button>
+        <button onclick="buyPlant('snowpea')">Snowpea (250 Coins)</button>
+        <button onclick="buyPlant('chili')">Chili Bean (300 Coins)</button>
+        <button onclick="buyPlant('repeater')">Repeater (350 Coins)</button>
+        <button onclick="buyPlant('corn')">Corn (400 Coins)</button>
+        <button onclick="buyPlant('garlic')">Garlic (50 Coins)</button>
+    </div>
+    <div id="field" class="field hidden">
+        <h2>Select a Plant</h2>
+        <button onclick="showShop()">Open Shop</button>
+    </div>
+    <div id="status" class="status hidden">
+        <div id="coinCount">Coins: 500</div>
+        <div id="lawnmowerStatus">Lawnmower Status: Idle</div>
+    </div>
     <canvas id="gameCanvas" width="800" height="600"></canvas>
     <script>
         const canvas = document.getElementById('gameCanvas');
@@ -53,6 +111,16 @@
 
         const gridWidth = 80; // Ширина и высота одной клетки
         const gridHeight = 80;
+        const plantCost = {
+            sunflower: 100,
+            peashooter: 150,
+            potatomine: 200,
+            snowpea: 250,
+            chili: 300,
+            repeater: 350,
+            corn: 400,
+            garlic: 50
+        };
 
         let plants = [];
         let zombies = [];
@@ -60,17 +128,47 @@
         let lawnmowers = [];
         let gameOver = false;
         let currentLevel = 1;
-        let gameMode = 'normal'; // Или 'hybrid'
+        let selectedPlant = null;
+        let coins = 500;
+        let lawnmowerTimer = 30;
+        let lawnmowerReady = true;
 
-        // Главная функция игры
+        const zombieTypes = {
+            normal: { speed: 1, health: 100 },
+            buckethead: { speed: 0.8, health: 150 },
+            conehead: { speed: 0.9, health: 120 },
+            runner: { speed: 1.2, health: 90 }
+        };
+
         function startGame() {
             document.getElementById('menu').classList.add('hidden');
+            document.getElementById('field').classList.remove('hidden');
+            document.getElementById('status').classList.remove('hidden');
             initializeGame();
             gameLoop();
         }
 
         function showInstructions() {
-            alert("Instructions:\n- Use 'Start Game' to begin the game.\n- Place plants to defend your house from zombies.\n- Zombies can eat plants and advance towards the house.\n- Use lawnmowers for an extra defense.\n- If zombies reach the house, you lose.");
+            alert("Instructions:\n- Use 'Open Shop' to buy plants.\n- Place plants to defend your house from zombies.\n- Zombies can eat plants and advance towards the house.\n- Use lawnmowers for an extra defense.\n- If zombies reach the house, you lose.");
+        }
+
+        function showShop() {
+            document.getElementById('shop').classList.remove('hidden');
+        }
+
+        function hideShop() {
+            document.getElementById('shop').classList.add('hidden');
+        }
+
+        function buyPlant(plantType) {
+            if (coins >= plantCost[plantType]) {
+                coins -= plantCost[plantType];
+                document.getElementById('coinCount').innerText = `Coins: ${coins}`;
+                selectedPlant = plantType;
+                hideShop();
+            } else {
+                alert("Not enough coins!");
+            }
         }
 
         function initializeGame() {
@@ -79,18 +177,21 @@
             projectiles = [];
             lawnmowers = [];
             gameOver = false;
+            lawnmowerTimer = 30;
+            lawnmowerReady = true;
 
-            // Добавление газонокосилок
             for (let i = 0; i < 5; i++) {
                 lawnmowers.push({
                     x: 0,
                     y: i * gridHeight + 80,
-                    used: false
+                    used: false,
+                    timer: lawnmowerTimer
                 });
             }
 
-            // Инициализация уровня
-            spawnZombies(currentLevel);
+            setTimeout(() => {
+                spawnZombies(currentLevel);
+            }, 5000); // Зомби начинают появляться через 5 секунд
         }
 
         function drawGrid() {
@@ -112,84 +213,76 @@
             }
         }
 
-        // Функция спауна зомби
         function spawnZombies(level) {
             for (let i = 0; i < level; i++) {
+                let zombieType = Object.keys(zombieTypes)[Math.floor(Math.random() * 4)];
                 zombies.push({
-                    type: ['normal', 'buckethead', 'conehead', 'runner'][Math.floor(Math.random() * 4)],
+                    type: zombieType,
                     x: canvas.width - gridWidth,
                     y: Math.floor(Math.random() * 5) * gridHeight + 80,
-                    speed: 1,
-                    health: 100,
-                    lane: Math.floor(Math.random() * 5) // Зомби будут двигаться по случайным дорожкам
+                    speed: zombieTypes[zombieType].speed,
+                    health: zombieTypes[zombieType].health,
+                    lane: Math.floor(Math.random() * 5)
                 });
             }
         }
 
-        // Функция стрельбы снарядами
         function shootProjectile(plant) {
-            // Задаем начальные параметры снаряда в зависимости от типа растения
             projectiles.push({
                 type: plant.type,
                 x: plant.x + gridWidth,
                 y: plant.y + gridHeight / 2,
-                speed: 5,
-                animationFrame: 0
+                speed: 5
             });
         }
 
-        // Основной игровой цикл
         function gameLoop() {
             if (gameOver) return;
 
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             drawGrid();
 
-            // Отображение газонокосилок
+            // Отображение газонокосилок и их движение
             lawnmowers.forEach(lawnmower => {
                 if (!lawnmower.used) {
                     ctx.fillStyle = 'yellow';
                     ctx.fillRect(lawnmower.x, lawnmower.y, gridWidth, gridHeight / 2);
                 }
+                if (lawnmower.timer > 0) {
+                    lawnmower.timer--;
+                } else {
+                    lawnmower.used = false;
+                    lawnmower.timer = lawnmowerTimer;
+                }
             });
 
-            // Отображение растений
-            plants.forEach((plant, plantIndex) => {
+            // Отображение и движение растений
+            plants.forEach(plant => {
                 ctx.fillStyle = 'green';
                 ctx.fillRect(plant.x, plant.y, gridWidth, gridHeight);
                 ctx.fillStyle = 'white';
-                ctx.font = '14px Arial';
                 ctx.fillText(plant.type.charAt(0).toUpperCase() + plant.type.slice(1), plant.x + 10, plant.y + 30);
 
-                // Проверка на поедание зомби
-                zombies.forEach((zombie, zombieIndex) => {
-                    if (zombie.x < plant.x + gridWidth && zombie.y < plant.y + gridHeight && zombie.y + gridHeight > plant.y) {
-                        plant.health -= 1;
-                        zombie.x += 0.5; // Замедляем зомби, пока он ест растение
-                        if (plant.health <= 0) {
-                            plants.splice(plantIndex, 1); // Удаление растения, если здоровье на нуле
-                        }
-                    }
-                });
+                if (plant.type === 'peashooter' || plant.type === 'repeater' || plant.type === 'corn') {
+                    shootProjectile(plant);
+                }
             });
 
-            // Проверка столкновений чеснока
-            checkGarlicCollision();
-
-            // Отображение снарядов и их столкновение с зомби
+            // Обработка снарядов
             projectiles.forEach((projectile, index) => {
                 ctx.fillStyle = 'red';
-                ctx.fillRect(projectile.x, projectile.y, 10, 10);
+                ctx.fillRect(projectile.x, projectile.y, 10, 5);
 
                 projectile.x += projectile.speed;
 
-                zombies.forEach((zombie, zombieIndex) => {
-                    if (projectile.x >= zombie.x && projectile.y >= zombie.y && projectile.y <= zombie.y + gridHeight) {
-                        zombie.health -= 20; // Урон зомби при попадании снаряда
+                zombies.forEach((zombie, zIndex) => {
+                    if (projectile.x < zombie.x + gridWidth && projectile.x + 10 > zombie.x &&
+                        projectile.y < zombie.y + gridHeight && projectile.y + 5 > zombie.y) {
+                        zombie.health -= 20; // Урон по зомби
                         if (zombie.health <= 0) {
-                            zombies.splice(zombieIndex, 1); // Удаляем зомби при уничтожении
+                            zombies.splice(zIndex, 1); // Удаление зомби
                         }
-                        projectiles.splice(index, 1); // Удаляем снаряд
+                        projectiles.splice(index, 1); // Удаление снаряда
                     }
                 });
             });
@@ -219,6 +312,8 @@
                 }
             });
 
+            checkGarlicCollision();
+
             requestAnimationFrame(gameLoop);
         }
 
@@ -236,6 +331,41 @@
                 }
             });
         }
+
+        // Добавление растения на поле
+        canvas.addEventListener('click', (event) => {
+            if (!selectedPlant) return;
+
+            const rect = canvas.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+            const gridX = Math.floor(x / gridWidth) * gridWidth;
+            const gridY = Math.floor(y / gridHeight) * gridHeight;
+
+            plants.push({
+                type: selectedPlant,
+                x: gridX,
+                y: gridY,
+                health: selectedPlant === 'potatomine' ? 50 : 100 // Примерные значения здоровья
+            });
+
+            selectedPlant = null; // Сброс выбора растения
+        });
+
+        // Обработка адаптации для различных устройств
+        function adjustForDevice() {
+            if (window.innerWidth < 600) {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight - 100; // Учитываем место для интерфейса
+            } else {
+                canvas.width = 800;
+                canvas.height = 600;
+            }
+        }
+
+        window.addEventListener('resize', adjustForDevice);
+        adjustForDevice(); // Начальная настройка
+
     </script>
 </body>
 </html>
