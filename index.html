@@ -13,21 +13,22 @@
         }
         #gameCanvas {
             border: 1px solid #000;
-            display: block;
-            margin: 0 auto;
             background: url('https://github.com/afanasi555/pvz/blob/main/assets/res/lawnmower/lawnmower.png?raw=true') no-repeat;
             background-size: cover;
+            display: block;
+            margin: 0 auto;
         }
-        #statusBar {
+        #statusBar, #progressBar {
             background: #333;
             color: #fff;
             padding: 10px;
             text-align: center;
             position: fixed;
-            top: 0;
             width: 100%;
             z-index: 10;
         }
+        #statusBar { top: 0; }
+        #progressBar { bottom: 0; }
         #shop {
             position: absolute;
             right: 0;
@@ -39,13 +40,13 @@
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
             z-index: 20;
         }
-        #shop img {
+        #shop img, #plantOptions img {
             width: 80px;
             height: 80px;
             cursor: pointer;
             margin: 5px;
         }
-        #shop button {
+        #shop button, #endScreen button {
             display: block;
             width: 100%;
             margin-top: 10px;
@@ -55,7 +56,7 @@
             border: none;
             cursor: pointer;
         }
-        #shop button:hover {
+        #shop button:hover, #endScreen button:hover {
             background: #c00;
         }
         #endScreen {
@@ -75,23 +76,6 @@
             width: 100px;
             height: 100px;
         }
-        #progressBar {
-            background: #444;
-            color: #fff;
-            padding: 5px;
-            text-align: center;
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            z-index: 10;
-        }
-        .cell {
-            width: 80px;
-            height: 80px;
-            border: 1px solid #999;
-            float: left;
-            position: relative;
-        }
         #plantOptions {
             position: absolute;
             top: 100px;
@@ -103,23 +87,19 @@
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
             z-index: 20;
         }
-        #plantOptions img {
+        .cell {
             width: 80px;
             height: 80px;
-            cursor: pointer;
-            margin: 5px;
-        }
-        #plantOptions h3 {
-            margin: 0;
-            padding: 0;
-            font-size: 16px;
+            border: 1px solid #999;
+            float: left;
+            position: relative;
         }
         @media (max-width: 768px) {
             #gameCanvas {
                 width: 100%;
                 height: auto;
             }
-            #plantOptions, #shop {
+            #shop, #plantOptions {
                 width: 100%;
                 right: 0;
                 top: auto;
@@ -173,12 +153,16 @@
         let gameWidth = canvas.width;
         let gameHeight = canvas.height;
         let plantCost = {sunflower: 50, peashooter: 100}; // Example costs
-        let plantTypes = {sunflower: {cost: 50, width: 80, height: 80, animation: ['sunflower1.png', 'sunflower2.png', 'sunflower3.png']},
-                          peashooter: {cost: 100, width: 80, height: 80, animation: ['Peashooter1.png', 'Peashooter2.png', 'Peashooter3.png']}};
-        let zombiesTypes = {normal: {speed: 1, animation: ['zombie_normal1.png', 'zombie_normal2.png', 'zombie_normal3.png']},
-                            buckethead: {speed: 0.8, animation: ['zombie_buckethead1.png', 'zombie_buckethead2.png', 'zombie_buckethead3.png']},
-                            conehead: {speed: 0.9, animation: ['zombie_conehead1.png', 'zombie_conehead2.png', 'zombie_conehead3.png']},
-                            runner: {speed: 1.2, animation: ['zombie_runner1.png', 'zombie_runner2.png', 'zombie_runner3.png']}};
+        let plantTypes = {
+            sunflower: {cost: 50, width: 80, height: 80, animation: ['sunflower1.png', 'sunflower2.png', 'sunflower3.png']},
+            peashooter: {cost: 100, width: 80, height: 80, animation: ['Peashooter1.png', 'Peashooter2.png', 'Peashooter3.png']}
+        };
+        let zombiesTypes = {
+            normal: {speed: 1, animation: ['zombie_normal1.png', 'zombie_normal2.png', 'zombie_normal3.png']},
+            buckethead: {speed: 0.8, animation: ['zombie_buckethead1.png', 'zombie_buckethead2.png', 'zombie_buckethead3.png']},
+            conehead: {speed: 0.9, animation: ['zombie_conehead1.png', 'zombie_conehead2.png', 'zombie_conehead3.png']},
+            runner: {speed: 1.2, animation: ['zombie_runner1.png', 'zombie_runner2.png', 'zombie_runner3.png']}
+        };
 
         function loadImage(src) {
             return new Promise((resolve) => {
