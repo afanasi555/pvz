@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PvZ Game</title>
     <style>
+        /* Стили для канваса и UI */
         canvas {
             border: 1px solid black;
         }
@@ -56,22 +57,29 @@
     </style>
 </head>
 <body>
+    <!-- Основной UI игры -->
     <div id="gameUI">
         <div>Coins: <span id="coins">50</span></div>
         <div>Suns: <span id="suns">0</span></div>
         <div>Lawnmower Status: <span id="lawnmowerStatus">Idle</span></div>
     </div>
+
+    <!-- Канвас для игрового поля -->
     <canvas id="gameCanvas" width="800" height="600"></canvas>
+    
+    <!-- Прогресс уровня -->
     <div id="progressBar">
         <div id="progressBarFill"></div>
     </div>
 
+    <!-- Магазин растений -->
     <div id="shop">
         <button onclick="selectPlant('sunflower')">Sunflower (50 suns)</button>
         <button onclick="selectPlant('peashooter')">Peashooter (100 suns)</button>
         <button onclick="closeShop()">X</button>
     </div>
 
+    <!-- Экран победы -->
     <div id="winScreen">
         <p>Congratulations! You've unlocked a new plant:</p>
         <img id="newPlantImage" src="" alt="New Plant">
@@ -79,6 +87,7 @@
     </div>
 
     <script>
+        // Основные настройки игры
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         const gridWidth = 80;
@@ -96,6 +105,7 @@
         const lawnmowers = [{ x: 80, y: 80, used: false }];
         let plantsUnlocked = ['sunflower', 'peashooter']; // Список разблокированных растений
 
+        // Типы зомби
         const zombieTypes = {
             normal: { speed: 1, health: 100, image: 'https://github.com/afanasi555/pvz/blob/main/assets/res/normal/zombie_normal1.png' },
             conehead: { speed: 0.8, health: 200, image: 'https://github.com/afanasi555/pvz/blob/main/assets/res/normal/zombie_conehead1.png' },
@@ -103,17 +113,16 @@
             runner: { speed: 1.5, health: 100, image: 'https://github.com/afanasi555/pvz/blob/main/assets/res/normal/zombie_runner1.png' }
         };
 
+        // Отрисовка игрового поля
         function drawGrid() {
             ctx.strokeStyle = 'black';
             ctx.lineWidth = 1;
-
             for (let x = gridWidth; x <= canvas.width; x += gridWidth) {
                 ctx.beginPath();
                 ctx.moveTo(x, 80);
                 ctx.lineTo(x, canvas.height);
                 ctx.stroke();
             }
-
             for (let y = 80; y <= canvas.height; y += gridHeight) {
                 ctx.beginPath();
                 ctx.moveTo(0, y);
@@ -122,6 +131,7 @@
             }
         }
 
+        // Создание зомби в начале уровня
         function spawnZombies(level) {
             for (let i = 0; i < zombiesToKill; i++) {
                 const zombieType = Object.keys(zombieTypes)[Math.floor(Math.random() * 4)];
@@ -137,6 +147,7 @@
             }
         }
 
+        // Логика стрельбы
         function shootProjectile(plant) {
             if (plant.type === 'peashooter') {
                 projectiles.push({
@@ -150,18 +161,22 @@
             }
         }
 
+        // Основной игровой цикл
         function gameLoop() {
             if (gameOver) return;
-
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-
             drawGrid();
-
-            // Отображение дома и газонокосилок
             drawHouse();
             drawLawnmowers();
+            handlePlants();
+            handleProjectiles();
+            handleZombies();
+            updateProgressBar();
+            requestAnimationFrame(gameLoop);
+        }
 
-            // Отображение и обновление растений
+        // Обработка растений
+        function handlePlants() {
             plants.forEach(plant => {
                 const plantImg = new Image();
                 plantImg.src = `https://github.com/afanasi555/pvz/blob/main/assets/res/normal/${plant.type}1.png`;
@@ -171,12 +186,13 @@
                     shootProjectile(plant);
                 }
             });
+        }
 
-            // Обработка снарядов
+        // Обработка снарядов
+        function handleProjectiles() {
             projectiles.forEach((projectile, index) => {
                 ctx.drawImage(projectile.image, projectile.x, projectile.y, 20, 10);
                 projectile.x += projectile.speed;
-
                 zombies.forEach((zombie, zIndex) => {
                     if (projectile.x < zombie.x + gridWidth && projectile.x + 20 > zombie.x &&
                         projectile.y < zombie.y + gridHeight && projectile.y + 10 > zombie.y) {
@@ -192,13 +208,14 @@
                     }
                 });
             });
+        }
 
-            // Движение и отображение зомби
+        // Обработка зомби
+        function handleZombies() {
             zombies.forEach(zombie => {
                 ctx.drawImage(zombie.image, zombie.x, zombie.y, gridWidth, gridHeight);
                 zombie.x -= zombie.speed;
 
-                // Проверка на газонокосилки
                 lawnmowers.forEach(lawnmower => {
                     if (!lawnmower.used && zombie.x <= lawnmower.x + gridWidth && zombie.y >= lawnmower.y && zombie.y <= lawnmower.y + gridHeight / 2) {
                         zombies.splice(zombies.indexOf(zombie), 1); // Удаление зомби
@@ -207,30 +224,27 @@
                     }
                 });
 
-                // Проверка на конец игры
                 if (zombie.x <= 0) {
                     alert("Game Over!");
                     gameOver = true;
                 }
             });
-
-            // Обновление полосы прогресса
-            updateProgressBar();
-
-            requestAnimationFrame(gameLoop);
         }
 
+        // Обновление полосы прогресса
         function updateProgressBar() {
             const progressBar = document.getElementById('progressBarFill');
             const progressPercentage = (zombiesKilled / zombiesToKill) * 100;
             progressBar.style.width = progressPercentage + '%';
         }
 
+        // Отрисовка дома
         function drawHouse() {
             ctx.fillStyle = 'gray';
             ctx.fillRect(0, 0, 160, 80);
         }
 
+        // Отрисовка газонокосилок
         function drawLawnmowers() {
             lawnmowers.forEach(lawnmower => {
                 const mowerImg = new Image();
@@ -239,6 +253,7 @@
             });
         }
 
+        // Логика выбора растения
         function selectPlant(plantType) {
             if (plantType === 'sunflower' && suns >= 50) {
                 selectedPlant = 'sunflower';
@@ -247,8 +262,10 @@
                 selectedPlant = 'peashooter';
                 suns -= 100;
             }
+            document.getElementById('suns').innerText = suns; // Обновление отображения солнц
         }
 
+        // Обработка клика по игровому полю для установки растения
         canvas.addEventListener('click', function (e) {
             if (!selectedPlant) return;
 
@@ -269,22 +286,26 @@
             }
         });
 
+        // Открытие магазина
         function openShop() {
             const shop = document.getElementById('shop');
             shop.style.display = 'block';
         }
 
+        // Закрытие магазина
         function closeShop() {
             const shop = document.getElementById('shop');
             shop.style.display = 'none';
         }
 
+        // Переход на следующую волну
         function nextWave() {
             zombiesKilled = 0;
             zombiesToKill += 10;
             spawnZombies(currentLevel);
         }
 
+        // Продолжение игры после победы
         function continueGame() {
             currentLevel++;
             unlockNextPlant();
@@ -292,16 +313,18 @@
             nextWave();
         }
 
+        // Разблокировка следующего растения
         function unlockNextPlant() {
             if (currentLevel === 2) {
                 plantsUnlocked.push('repeater');
             } else if (currentLevel === 3) {
                 plantsUnlocked.push('corn');
             }
-            // Добавить другие растения по мере прохождения уровней
+            // Добавление других растений по мере прохождения уровней
             updateShop();
         }
 
+        // Обновление магазина в зависимости от разблокированных растений
         function updateShop() {
             const shopButtons = document.querySelectorAll('#shop button');
             shopButtons.forEach(button => {
@@ -313,6 +336,7 @@
             });
         }
 
+        // Инициализация игры
         function initGame() {
             updateShop();
             spawnZombies(currentLevel);
