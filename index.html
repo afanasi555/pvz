@@ -77,6 +77,23 @@
             padding: 10px;
             border-radius: 10px;
         }
+        .progress-bar {
+            position: absolute;
+            top: 50px;
+            left: 20px;
+            width: 300px;
+            height: 20px;
+            border: 2px solid #fff;
+            background: #333;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .progress-bar div {
+            height: 100%;
+            background: #4CAF50;
+            width: 0;
+            transition: width 0.5s;
+        }
     </style>
 </head>
 <body>
@@ -102,7 +119,11 @@
     </div>
     <div id="status" class="status hidden">
         <div id="coinCount">Coins: 500</div>
+        <div id="sunCount">Suns: 0</div>
         <div id="lawnmowerStatus">Lawnmower Status: Idle</div>
+    </div>
+    <div id="progressBar" class="progress-bar hidden">
+        <div id="progressBarFill"></div>
     </div>
     <canvas id="gameCanvas" width="800" height="600"></canvas>
     <script>
@@ -130,20 +151,24 @@
         let currentLevel = 1;
         let selectedPlant = null;
         let coins = 500;
+        let suns = 0;
         let lawnmowerTimer = 30;
         let lawnmowerReady = true;
+        let zombiesToKill = 10;
+        let zombiesKilled = 0;
 
         const zombieTypes = {
-            normal: { speed: 1, health: 100 },
-            buckethead: { speed: 0.8, health: 150 },
-            conehead: { speed: 0.9, health: 120 },
-            runner: { speed: 1.2, health: 90 }
+            normal: { speed: 1, health: 100, image: 'zombie_norma1.png' },
+            buckethead: { speed: 0.8, health: 150, image: 'zombie_buskethead1.png' },
+            conehead: { speed: 0.9, health: 120, image: 'zombie_conehead1.png' },
+            runner: { speed: 1.2, health: 90, image: 'zombie_runner1.png' }
         };
 
         function startGame() {
             document.getElementById('menu').classList.add('hidden');
             document.getElementById('field').classList.remove('hidden');
             document.getElementById('status').classList.remove('hidden');
+            document.getElementById('progressBar').classList.remove('hidden');
             initializeGame();
             gameLoop();
         }
@@ -177,8 +202,7 @@
             projectiles = [];
             lawnmowers = [];
             gameOver = false;
-            lawnmowerTimer = 30;
-            lawnmowerReady = true;
+            zombiesKilled = 0;
 
             for (let i = 0; i < 5; i++) {
                 lawnmowers.push({
@@ -214,7 +238,8 @@
         }
 
         function spawnZombies(level) {
-            for (let i = 0; i < level; i++) {
+            let zombiesToSpawn = level * 5;
+            for (let i = 0; i < zombiesToSpawn; i++) {
                 let zombieType = Object.keys(zombieTypes)[Math.floor(Math.random() * 4)];
                 zombies.push({
                     type: zombieType,
@@ -222,41 +247,60 @@
                     y: Math.floor(Math.random() * 5) * gridHeight + 80,
                     speed: zombieTypes[zombieType].speed,
                     health: zombieTypes[zombieType].health,
+                    image: new Image(),
                     lane: Math.floor(Math.random() * 5)
                 });
+                zombies[zombies.length - 1].image.src = `https://github.com/afanasi555/pvz/blob/main/assets/res/normal/${zombieTypes[zombieType].image}`;
             }
         }
 
         function shootProjectile(plant) {
-            projectiles.push({
-                type: plant.type,
-                x: plant.x + gridWidth,
-                y: plant.y + gridHeight / 2,
-                speed: 5
-            });
+            if (plant.type === 'peashooter') {
+                projectiles.push({
+                    x: plant.x + gridWidth,
+                    y: plant.y + gridHeight / 2,
+                    speed: 5,
+                    image: new Image(),
+                    type: 'pea'
+                });
+                projectiles[projectiles.length - 1].image.src = 'https://github.com/afanasi555/pvz/blob/main/assets/res/projectiles/pea1.png';
+            } else if (plant.type === 'repeater') {
+                projectiles.push({
+                    x: plant.x + gridWidth,
+                    y: plant.y + gridHeight / 2,
+                    speed: 5,
+                    image: new Image(),
+                    type: 'repeater'
+                });
+                projectiles.push({
+                    x: plant.x + gridWidth,
+                    y: plant.y + gridHeight / 2,
+                    speed: 5,
+                    image: new Image(),
+                    type: 'repeater'
+                });
+                projectiles[projectiles.length - 2].image.src = 'https://github.com/afanasi555/pvz/blob/main/assets/res/projectiles/repeater_pea1.png';
+                projectiles[projectiles.length - 1].image.src = 'https://github.com/afanasi555/pvz/blob/main/assets/res/projectiles/repeater_pea2.png';
+            } else if (plant.type === 'corn') {
+                projectiles.push({
+                    x: plant.x + gridWidth,
+                    y: plant.y + gridHeight / 2,
+                    speed: 5,
+                    image: new Image(),
+                    type: 'corn'
+                });
+                projectiles[projectiles.length - 1].image.src = 'https://github.com/afanasi555/pvz/blob/main/assets/res/projectiles/corn_shot1.png';
+            }
         }
 
         function gameLoop() {
             if (gameOver) return;
 
             ctx.clearRect(0, 0, canvas.width, canvas.height);
+
             drawGrid();
 
-            // Отображение газонокосилок и их движение
-            lawnmowers.forEach(lawnmower => {
-                if (!lawnmower.used) {
-                    ctx.fillStyle = 'yellow';
-                    ctx.fillRect(lawnmower.x, lawnmower.y, gridWidth, gridHeight / 2);
-                }
-                if (lawnmower.timer > 0) {
-                    lawnmower.timer--;
-                } else {
-                    lawnmower.used = false;
-                    lawnmower.timer = lawnmowerTimer;
-                }
-            });
-
-            // Отображение и движение растений
+            // Отображение и обновление растений
             plants.forEach(plant => {
                 ctx.fillStyle = 'green';
                 ctx.fillRect(plant.x, plant.y, gridWidth, gridHeight);
@@ -270,17 +314,19 @@
 
             // Обработка снарядов
             projectiles.forEach((projectile, index) => {
-                ctx.fillStyle = 'red';
-                ctx.fillRect(projectile.x, projectile.y, 10, 5);
-
+                ctx.drawImage(projectile.image, projectile.x, projectile.y, 20, 10);
                 projectile.x += projectile.speed;
 
                 zombies.forEach((zombie, zIndex) => {
-                    if (projectile.x < zombie.x + gridWidth && projectile.x + 10 > zombie.x &&
-                        projectile.y < zombie.y + gridHeight && projectile.y + 5 > zombie.y) {
+                    if (projectile.x < zombie.x + gridWidth && projectile.x + 20 > zombie.x &&
+                        projectile.y < zombie.y + gridHeight && projectile.y + 10 > zombie.y) {
                         zombie.health -= 20; // Урон по зомби
                         if (zombie.health <= 0) {
                             zombies.splice(zIndex, 1); // Удаление зомби
+                            zombiesKilled++;
+                            if (zombiesKilled >= zombiesToKill) {
+                                nextWave();
+                            }
                         }
                         projectiles.splice(index, 1); // Удаление снаряда
                     }
@@ -289,11 +335,7 @@
 
             // Движение и отображение зомби
             zombies.forEach(zombie => {
-                ctx.fillStyle = 'grey';
-                ctx.fillRect(zombie.x, zombie.y, gridWidth, gridHeight);
-                ctx.fillStyle = 'black';
-                ctx.fillText(zombie.type.charAt(0).toUpperCase() + zombie.type.slice(1), zombie.x + 10, zombie.y + 30);
-
+                ctx.drawImage(zombie.image, zombie.x, zombie.y, gridWidth, gridHeight);
                 zombie.x -= zombie.speed;
 
                 // Проверка на газонокосилки
@@ -301,6 +343,7 @@
                     if (!lawnmower.used && zombie.x <= lawnmower.x + gridWidth && zombie.y >= lawnmower.y && zombie.y <= lawnmower.y + gridHeight / 2) {
                         zombies.splice(zombies.indexOf(zombie), 1); // Удаление зомби
                         lawnmower.used = true; // Использование газонокосилки
+                        document.getElementById('lawnmowerStatus').innerText = 'Lawnmower Status: Used';
                     }
                 });
 
@@ -313,6 +356,7 @@
             });
 
             checkGarlicCollision();
+            updateProgressBar();
 
             requestAnimationFrame(gameLoop);
         }
@@ -331,6 +375,35 @@
                 }
             });
         }
+
+        // Функция обновления полосы прогресса
+        function updateProgressBar() {
+            const progressBar = document.getElementById('progressBarFill');
+            progressBar.style.width = `${(zombiesKilled / zombiesToKill) * 100}%`;
+        }
+
+        // Функция перехода на следующую волну
+        function nextWave() {
+            currentLevel++;
+            zombiesKilled = 0;
+            zombiesToKill += 5;
+            document.getElementById('progressBarFill').style.width = '0%';
+            spawnZombies(currentLevel);
+        }
+
+        // Обработка адаптации для различных устройств
+        function adjustForDevice() {
+            if (window.innerWidth < 600) {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight - 100; // Учитываем место для интерфейса
+            } else {
+                canvas.width = 800;
+                canvas.height = 600;
+            }
+        }
+
+        window.addEventListener('resize', adjustForDevice);
+        adjustForDevice(); // Начальная настройка
 
         // Добавление растения на поле
         canvas.addEventListener('click', (event) => {
@@ -351,20 +424,6 @@
 
             selectedPlant = null; // Сброс выбора растения
         });
-
-        // Обработка адаптации для различных устройств
-        function adjustForDevice() {
-            if (window.innerWidth < 600) {
-                canvas.width = window.innerWidth;
-                canvas.height = window.innerHeight - 100; // Учитываем место для интерфейса
-            } else {
-                canvas.width = 800;
-                canvas.height = 600;
-            }
-        }
-
-        window.addEventListener('resize', adjustForDevice);
-        adjustForDevice(); // Начальная настройка
 
     </script>
 </body>
