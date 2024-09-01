@@ -15,7 +15,7 @@
             border: 1px solid #000;
             display: block;
             margin: 0 auto;
-            background-image: url('https://github.com/afanasi555/pvz/blob/main/assets/res/lawnmower/lawnmower.png?raw=true');
+            background: url('https://github.com/afanasi555/pvz/blob/main/assets/res/lawnmower/lawnmower.png?raw=true') no-repeat;
             background-size: cover;
         }
         #statusBar {
@@ -109,6 +109,11 @@
             cursor: pointer;
             margin: 5px;
         }
+        #plantOptions h3 {
+            margin: 0;
+            padding: 0;
+            font-size: 16px;
+        }
         @media (max-width: 768px) {
             #gameCanvas {
                 width: 100%;
@@ -171,7 +176,7 @@
         let plantTypes = {sunflower: {cost: 50, width: 80, height: 80, animation: ['sunflower1.png', 'sunflower2.png', 'sunflower3.png']},
                           peashooter: {cost: 100, width: 80, height: 80, animation: ['Peashooter1.png', 'Peashooter2.png', 'Peashooter3.png']}};
         let zombiesTypes = {normal: {speed: 1, animation: ['zombie_normal1.png', 'zombie_normal2.png', 'zombie_normal3.png']},
-                            buckethead: {speed: 0.8, animation: ['zombie_buskethead1.png', 'zombie_buskethead2.png', 'zombie_buskethead3.png']},
+                            buckethead: {speed: 0.8, animation: ['zombie_buckethead1.png', 'zombie_buckethead2.png', 'zombie_buckethead3.png']},
                             conehead: {speed: 0.9, animation: ['zombie_conehead1.png', 'zombie_conehead2.png', 'zombie_conehead3.png']},
                             runner: {speed: 1.2, animation: ['zombie_runner1.png', 'zombie_runner2.png', 'zombie_runner3.png']}};
 
@@ -205,22 +210,11 @@
             sunsElem.textContent = suns;
         }
 
-        function showEndScreen() {
-            endScreen.style.display = 'block';
-        }
-
-        function closeShop() {
-            shop.style.display = 'none';
-        }
-
-        function updateProgress() {
-            progressElem.textContent = `${levelProgress}%`;
-        }
-
         function initializeLevel() {
-            // Initialize level with zombies and other game elements
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
             levelProgress = 0;
-            updateProgress();
+            progressElem.textContent = `${levelProgress}%`;
+            // Initialize other level-related settings here
         }
 
         function handleClick(event) {
@@ -230,6 +224,7 @@
                 const y = event.clientY - rect.top;
                 if (suns >= plantTypes[selectedPlant].cost) {
                     suns -= plantTypes[selectedPlant].cost;
+                    updateStatus();
                     drawPlant(selectedPlant, x, y);
                 } else {
                     alert('Not enough suns!');
@@ -242,16 +237,29 @@
             selectedPlant = event.target.dataset.type;
         }
 
+        function closeShop() {
+            shop.style.display = 'none';
+        }
+
+        function endGame() {
+            endScreen.style.display = 'block';
+        }
+
+        function continueGame() {
+            endScreen.style.display = 'none';
+            currentLevel++;
+            initializeLevel();
+        }
+
         function init() {
             updateStatus();
             initializeLevel();
-            document.getElementById('plantOptions').addEventListener('click', handlePlantClick);
+            document.querySelectorAll('#plantOptions .plant').forEach(img => {
+                img.addEventListener('click', handlePlantClick);
+            });
             canvas.addEventListener('click', handleClick);
             closeShopButton.addEventListener('click', closeShop);
-            continueButton.addEventListener('click', () => {
-                endScreen.style.display = 'none';
-                initializeLevel();
-            });
+            continueButton.addEventListener('click', continueGame);
         }
 
         init();
