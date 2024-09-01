@@ -150,66 +150,162 @@
         let zombies = [];
         let levelProgress = 0;
         let selectedPlant = null;
-        let gameWidth = canvas.width;
-        let gameHeight = canvas.height;
         let plantCost = {sunflower: 50, peashooter: 100}; // Example costs
         let plantTypes = {
-            sunflower: {cost: 50, width: 80, height: 80, animation: ['sunflower1.png', 'sunflower2.png', 'sunflower3.png']},
-            peashooter: {cost: 100, width: 80, height: 80, animation: ['Peashooter1.png', 'Peashooter2.png', 'Peashooter3.png']}
+            sunflower: {cost: 50, width: 80, height: 80, animation: [
+                'https://github.com/afanasi555/pvz/blob/main/assets/res/normal/sunflower1.png?raw=true',
+                'https://github.com/afanasi555/pvz/blob/main/assets/res/normal/sunflower2.png?raw=true',
+                'https://github.com/afanasi555/pvz/blob/main/assets/res/normal/sunflower3.png?raw=true'
+            ]},
+            peashooter: {cost: 100, width: 80, height: 80, animation: [
+                'https://github.com/afanasi555/pvz/blob/main/assets/res/normal/Peashooter1.png?raw=true',
+                'https://github.com/afanasi555/pvz/blob/main/assets/res/normal/Peashooter2.png?raw=true',
+                'https://github.com/afanasi555/pvz/blob/main/assets/res/normal/Peashooter3.png?raw=true'
+            ]}
         };
         let zombiesTypes = {
-            normal: {speed: 1, animation: ['zombie_normal1.png', 'zombie_normal2.png', 'zombie_normal3.png']},
-            buckethead: {speed: 0.8, animation: ['zombie_buckethead1.png', 'zombie_buckethead2.png', 'zombie_buckethead3.png']},
-            conehead: {speed: 0.9, animation: ['zombie_conehead1.png', 'zombie_conehead2.png', 'zombie_conehead3.png']},
-            runner: {speed: 1.2, animation: ['zombie_runner1.png', 'zombie_runner2.png', 'zombie_runner3.png']}
+            normal: {speed: 1, animation: [
+                'https://github.com/afanasi555/pvz/blob/main/assets/res/normal/zombie_normal1.png?raw=true',
+                'https://github.com/afanasi555/pvz/blob/main/assets/res/normal/zombie_normal2.png?raw=true',
+                'https://github.com/afanasi555/pvz/blob/main/assets/res/normal/zombie_normal3.png?raw=true'
+            ]},
+            buckethead: {speed: 0.8, animation: [
+                'https://github.com/afanasi555/pvz/blob/main/assets/res/normal/zombie_buckethead1.png?raw=true',
+                'https://github.com/afanasi555/pvz/blob/main/assets/res/normal/zombie_buckethead2.png?raw=true',
+                'https://github.com/afanasi555/pvz/blob/main/assets/res/normal/zombie_buckethead3.png?raw=true'
+            ]},
+            conehead: {speed: 0.9, animation: [
+                'https://github.com/afanasi555/pvz/blob/main/assets/res/normal/zombie_conehead1.png?raw=true',
+                'https://github.com/afanasi555/pvz/blob/main/assets/res/normal/zombie_conehead2.png?raw=true',
+                'https://github.com/afanasi555/pvz/blob/main/assets/res/normal/zombie_conehead3.png?raw=true'
+            ]},
+            runner: {speed: 1.2, animation: [
+                'https://github.com/afanasi555/pvz/blob/main/assets/res/normal/zombie_runner1.png?raw=true',
+                'https://github.com/afanasi555/pvz/blob/main/assets/res/normal/zombie_runner2.png?raw=true',
+                'https://github.com/afanasi555/pvz/blob/main/assets/res/normal/zombie_runner3.png?raw=true'
+            ]}
         };
-
-        function loadImage(src) {
-            return new Promise((resolve) => {
-                const img = new Image();
-                img.src = src;
-                img.onload = () => resolve(img);
-            });
-        }
-
-        function drawPlant(type, x, y) {
-            const plant = {
-                type: type,
-                x: x,
-                y: y,
-                width: 80,
-                height: 80,
-                animationIndex: 0,
-                animation: plantTypes[type].animation
-            };
-            plants.push(plant);
-            const imgSrc = `https://github.com/afanasi555/pvz/blob/main/assets/res/normal/${plant.animation[0]}?raw=true`;
-            loadImage(imgSrc).then((img) => {
-                ctx.drawImage(img, x, y, plant.width, plant.height);
-            });
-        }
 
         function updateStatus() {
             coinsElem.textContent = coins;
             sunsElem.textContent = suns;
+            mowerStatusElem.textContent = 'Idle';
+            progressElem.textContent = `${levelProgress}%`;
+        }
+
+        function drawPlant(type, x, y) {
+            if (plantTypes[type]) {
+                const plant = plantTypes[type];
+                const img = new Image();
+                img.src = plant.animation[0];
+                img.onload = () => {
+                    ctx.drawImage(img, x, y, plant.width, plant.height);
+                };
+            }
+        }
+
+        function animatePlant(plant) {
+            if (plantTypes[plant.type]) {
+                const plantData = plantTypes[plant.type];
+                let frame = 0;
+                function update() {
+                    ctx.clearRect(plant.x, plant.y, plantData.width, plantData.height);
+                    const img = new Image();
+                    img.src = plantData.animation[frame];
+                    img.onload = () => {
+                        ctx.drawImage(img, plant.x, plant.y, plantData.width, plantData.height);
+                    };
+                    frame = (frame + 1) % plantData.animation.length;
+                    setTimeout(update, 500); // Change frame every 500ms
+                }
+                update();
+            }
+        }
+
+        function drawZombie(zombie) {
+            if (zombiesTypes[zombie.type]) {
+                const zombieData = zombiesTypes[zombie.type];
+                const img = new Image();
+                img.src = zombieData.animation[0];
+                img.onload = () => {
+                    ctx.drawImage(img, zombie.x, zombie.y, 80, 80);
+                };
+            }
+        }
+
+        function animateZombie(zombie) {
+            if (zombiesTypes[zombie.type]) {
+                const zombieData = zombiesTypes[zombie.type];
+                let frame = 0;
+                function update() {
+                    ctx.clearRect(zombie.x, zombie.y, 80, 80);
+                    const img = new Image();
+                    img.src = zombieData.animation[frame];
+                    img.onload = () => {
+                        ctx.drawImage(img, zombie.x, zombie.y, 80, 80);
+                    };
+                    frame = (frame + 1) % zombieData.animation.length;
+                    setTimeout(update, 500); // Change frame every 500ms
+                }
+                update();
+            }
+        }
+
+        function moveZombies() {
+            zombies.forEach(zombie => {
+                zombie.x -= zombiesTypes[zombie.type].speed;
+                // Check for collision with plants
+                plants.forEach(plant => {
+                    if (zombie.x < plant.x + plantTypes[plant.type].width &&
+                        zombie.x + 80 > plant.x &&
+                        zombie.y < plant.y + plantTypes[plant.type].height &&
+                        zombie.y + 80 > plant.y) {
+                        // Zombie collided with plant
+                        console.log('Collision detected!');
+                        // Implement collision logic here
+                    }
+                });
+            });
+        }
+
+        function updateZombies() {
+            moveZombies();
+            zombies.forEach(zombie => {
+                animateZombie(zombie);
+            });
+        }
+
+        function spawnZombie() {
+            const types = Object.keys(zombiesTypes);
+            const type = types[Math.floor(Math.random() * types.length)];
+            zombies.push({
+                type: type,
+                x: canvas.width,
+                y: Math.random() * (canvas.height - 80)
+            });
         }
 
         function initializeLevel() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
             levelProgress = 0;
-            progressElem.textContent = `${levelProgress}%`;
-            // Initialize other level-related settings here
+            updateStatus();
+            spawnZombie(); // For example, spawn a zombie at the start
+        }
+
+        function startLevel() {
+            initializeLevel();
+            // Start spawning zombies and progressing through the level
         }
 
         function handleClick(event) {
             if (selectedPlant) {
-                const rect = canvas.getBoundingClientRect();
-                const x = event.clientX - rect.left;
-                const y = event.clientY - rect.top;
+                const x = event.offsetX - (plantTypes[selectedPlant].width / 2);
+                const y = event.offsetY - (plantTypes[selectedPlant].height / 2);
                 if (suns >= plantTypes[selectedPlant].cost) {
                     suns -= plantTypes[selectedPlant].cost;
                     updateStatus();
                     drawPlant(selectedPlant, x, y);
+                    plants.push({ type: selectedPlant, x, y });
+                    animatePlant({ type: selectedPlant, x, y });
                 } else {
                     alert('Not enough suns!');
                 }
@@ -235,6 +331,14 @@
             initializeLevel();
         }
 
+        function updateProgress() {
+            levelProgress += 10; // Example increment
+            progressElem.textContent = `${levelProgress}%`;
+            if (levelProgress >= 100) {
+                endGame(); // End game when progress reaches 100%
+            }
+        }
+
         function init() {
             updateStatus();
             initializeLevel();
@@ -244,6 +348,8 @@
             canvas.addEventListener('click', handleClick);
             closeShopButton.addEventListener('click', closeShop);
             continueButton.addEventListener('click', continueGame);
+            setInterval(updateZombies, 1000); // Update zombies every second
+            setInterval(updateProgress, 5000); // Update level progress every 5 seconds
         }
 
         init();
