@@ -1,15 +1,101 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minecraft Inspired Game</title>
+    <title>Игра на основе нейросети</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden; /* Скрыть прокрутку */
+            font-family: Arial, sans-serif;
+        }
+
+        #menu {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh; /* Занять всю высоту экрана */
+            background-color: #f0f0f0; /* Фоновый цвет меню */
+        }
+
+        #gameCanvas {
+            display: none; /* Скрыть канвас изначально */
+            width: 100%;
+            height: 100%;
+            background-color: #a0d8ef; /* Цвет фона для канваса */
+        }
+
+        button {
+            margin: 10px;
+            padding: 15px 30px;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        #controls {
+            display: none; /* Скрыть контролы по умолчанию */
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+        }
+
+        .control-button {
+            padding: 10px;
+            margin: 5px;
+        }
+    </style>
 </head>
 <body>
+    <div id="menu">
+        <h1>Главное меню</h1>
+        <button id="start-button">Старт</button>
+        <button id="control-toggle">Переключить управление</button>
+    </div>
+    
     <canvas id="gameCanvas"></canvas>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.loader.js"></script>
-    <script src="main.js"></script>
+
+    <div id="controls">
+        <button class="control-button" id="move-button">Движение</button>
+        <button class="control-button" id="run-button">Бег</button>
+        <button class="control-button" id="jump-button">Прыжок</button>
+        <button class="control-button" id="attack-button">Удар</button>
+        <button class="control-button" id="build-button">Строить</button>
+        <button class="control-button" id="break-button">Ломать</button>
+        <button class="control-button" id="use-button">Использовать</button>
+    </div>
+
+    <script src="game.js"></script>
+    <script>
+        // Переключение между меню и игрой
+        const startButton = document.getElementById('start-button');
+        const gameCanvas = document.getElementById('gameCanvas');
+        const menu = document.getElementById('menu');
+        const controls = document.getElementById('controls');
+
+        startButton.addEventListener('click', () => {
+            menu.style.display = 'none';
+            gameCanvas.style.display = 'block'; // Показываем канвас
+            controls.style.display = 'block'; // Показываем контролы
+            startGame(); // Функция для начала игры
+        });
+
+        // Пример функции старта игры
+        function startGame() {
+            const ctx = gameCanvas.getContext('2d');
+            gameCanvas.width = window.innerWidth;
+            gameCanvas.height = window.innerHeight;
+
+            // Основной игровой цикл
+            function gameLoop() {
+                ctx.clearRect(0, 0, gameCanvas.width, gameCanvas.height); // Очистка канваса
+                // Здесь будет логика генерации и отрисовки игры с использованием нейросети
+                requestAnimationFrame(gameLoop); // Запрос следующего кадра
+            }
+            gameLoop(); // Запуск игрового цикла
+        }
+    </script>
 </body>
 </html>
