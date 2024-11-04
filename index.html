@@ -67,7 +67,7 @@
         <button class="control-button" id="use-button">Использовать</button>
     </div>
 
-    <script src="game.js"></script>
+    <script src="game.js"></script> <!-- Ссылка на ваш файл game.js -->
     <script>
         // Переключение между меню и игрой
         const startButton = document.getElementById('start-button');
@@ -88,14 +88,41 @@
             gameCanvas.width = window.innerWidth;
             gameCanvas.height = window.innerHeight;
 
+            // Инициализация игры (вызов функции из game.js)
+            initGame(ctx);
+
             // Основной игровой цикл
             function gameLoop() {
                 ctx.clearRect(0, 0, gameCanvas.width, gameCanvas.height); // Очистка канваса
-                // Здесь будет логика генерации и отрисовки игры с использованием нейросети
+                updateGame(); // Обновление состояния игры (из game.js)
+                renderGame(ctx); // Отрисовка игры (из game.js)
                 requestAnimationFrame(gameLoop); // Запрос следующего кадра
             }
             gameLoop(); // Запуск игрового цикла
         }
+
+        // Привязка управления к кнопкам
+        document.getElementById('move-button').addEventListener('click', () => {
+            movePlayer(); // Функция перемещения игрока из game.js
+        });
+        document.getElementById('run-button').addEventListener('click', () => {
+            runPlayer(); // Функция бега игрока из game.js
+        });
+        document.getElementById('jump-button').addEventListener('click', () => {
+            jumpPlayer(); // Функция прыжка игрока из game.js
+        });
+        document.getElementById('attack-button').addEventListener('click', () => {
+            attackPlayer(); // Функция удара игрока из game.js
+        });
+        document.getElementById('build-button').addEventListener('click', () => {
+            build(); // Функция строительства из game.js
+        });
+        document.getElementById('break-button').addEventListener('click', () => {
+            breakBlock(); // Функция разрушения блока из game.js
+        });
+        document.getElementById('use-button').addEventListener('click', () => {
+            useItem(); // Функция использования предмета из game.js
+        });
     </script>
 </body>
 </html>
