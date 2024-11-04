@@ -1,0 +1,66 @@
+body {
+    margin: 0;
+    overflow: hidden; /* Скрыть прокрутку */
+    font-family: Arial, sans-serif;
+    background-color: #a0d8ef; /* Цвет фона для всей страницы */
+}
+
+#menu {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh; /* Занять всю высоту экрана */
+    background-color: rgba(255, 255, 255, 0.9); /* Полупрозрачный фон меню */
+    border-radius: 10px; /* Скругленные углы */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Тень для меню */
+}
+
+#gameCanvas {
+    display: none; /* Скрыть канвас изначально */
+    width: 100%;
+    height: 100%;
+    background-color: #a0d8ef; /* Цвет фона для канваса */
+}
+
+button {
+    margin: 10px;
+    padding: 15px 30px;
+    font-size: 18px;
+    cursor: pointer;
+    border: none;
+    border-radius: 5px; /* Скругленные углы кнопок */
+    background-color: #007BFF; /* Синий фон для кнопок */
+    color: white; /* Цвет текста */
+    transition: background-color 0.3s; /* Плавный переход цвета фона */
+}
+
+button:hover {
+    background-color: #0056b3; /* Более темный цвет при наведении */
+}
+
+#controls {
+    display: none; /* Скрыть контролы по умолчанию */
+    position: fixed;
+    bottom: 10px;
+    left: 10px;
+    background-color: rgba(255, 255, 255, 0.8); /* Полупрозрачный фон для контролов */
+    border-radius: 10px; /* Скругленные углы */
+    padding: 10px; /* Внутренние отступы */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Тень для контролов */
+}
+
+.control-button {
+    padding: 10px;
+    margin: 5px;
+    background-color: #28a745; /* Зеленый фон для кнопок управления */
+    color: white; /* Цвет текста */
+    border: none;
+    border-radius: 5px; /* Скругленные углы */
+    cursor: pointer;
+    transition: background-color 0.3s; /* Плавный переход цвета фона */
+}
+
+.control-button:hover {
+    background-color: #218838; /* Более темный цвет при наведении */
+}
